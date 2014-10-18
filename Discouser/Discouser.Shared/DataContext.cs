@@ -19,7 +19,7 @@ namespace Discouser
         private string _username;
         private string _sitePath;
 
-        DataContext(string url, string username)
+        public DataContext(string url, string username)
         {
             _username = username;
             _sitePath = url;
