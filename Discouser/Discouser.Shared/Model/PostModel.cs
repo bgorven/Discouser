@@ -25,5 +25,11 @@ namespace Discouser.Model
         public int Html { get; set; }
 
         public bool Deleted { get; set; }
+
+        [Ignore]
+        public string HtmlCache { get; set; }
+
+        [Ignore]
+        public string TextCache { get; set; }
     }
 }

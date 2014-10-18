@@ -7,25 +7,26 @@ namespace Discouser.ViewModel
 {
     abstract class ViewModelBase<TModel> : INotifyPropertyChanged where TModel : Model.Model, new()
     {
-        internal readonly SQLiteConnection _db;
-        internal readonly ApiConnection _api;
-        internal TModel _model;
+        protected DataContext _context;
+        protected TModel _model;
 
-        internal ViewModelBase(TModel model, SQLiteConnection db, ApiConnection api)
+        internal ViewModelBase() { }
+
+        internal ViewModelBase(int id, DataContext context)
         {
-            _api = api;
-            _model = model;
-            _db = db;
+            _context = context;
+            _model = _context.Db.Get<TModel>(id);
         }
 
-        internal ViewModelBase(int id, SQLiteConnection db, ApiConnection api)
+        internal TModel LoadModel()
         {
-            _model = db.Get<TModel>(id);
-            _api = api;
-            _db = db;
+            return _context.Db.Get<TModel>(_model.Id);
         }
 
-        private bool _changes = false;
+        private volatile bool _changes = false;
+        /// <summary>
+        /// Used by the UI to indicate that there are changes available to load.
+        /// </summary>
         internal bool Changes
         {
             get { return _changes; }
@@ -36,23 +37,46 @@ namespace Discouser.ViewModel
             }
         }
 
-        public abstract Task Load();
+        /// <summary>
+        /// Called by the DataContext when there is a change available.
+        /// </summary>
+        public abstract void NotifyChanges(TModel model);
+
+        /// <summary>
+        /// Called by the UI when the user is ready to see the changed data.
+        /// </summary>
+        public virtual Task LoadChanges()
+        {
+            RaisePropertyChanged();
+            Changes = false;
+            return null;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        internal void RaisePropertyChanged(string propertyName)
+        protected string[] _changedProperties;
+
+        internal void RaisePropertyChanged()
         {
-            if (PropertyChanged != null)
+            RaisePropertyChanged(_changedProperties);
+        }
+
+        internal void RaisePropertyChanged(string[] changedProperties)
+        {
+            if (changedProperties != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                foreach (var name in changedProperties)
+                {
+                    RaisePropertyChanged(name);
+                }
             }
         }
 
-        internal void RaisePropertyChanged(string[] propertyNames)
+        internal void RaisePropertyChanged(string propertyName)
         {
-            foreach (var name in propertyNames)
+            if (PropertyChanged != null && !string.IsNullOrEmpty(propertyName))
             {
-                RaisePropertyChanged(name);
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

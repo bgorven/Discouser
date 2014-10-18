@@ -3,29 +3,30 @@ using SQLite;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace Discouser.ViewModel
 {
     class Category : ViewModelBase<Model.Category>
     {
-        public Category(Model.Category model, SQLiteConnection db, ApiConnection api) : base(model, db, api) { }
-        public Category(int id, SQLiteConnection db, ApiConnection api) : base(id, db, api) { }
+        public Category(int id, DataContext context) : base(id, context) { }
 
-        public override async Task Load()
+        public override void NotifyChanges(Model.Category model)
         {
-            _model = _db.Get<Model.Category>(_model.Id);
-            Topics = await Task.Run(() =>
-            {
-                return new ObservableCollection<Topic>(
-                    (_db.Table<Model.Topic>()
-                    .Where(t => t.CategoryId == _model.Id)
-                    .OrderByDescending(t => t.Activity)
-                    .ToList())
-                    .Select(t => new Topic(t, _db, _api)));
-            });
+            model = model ?? LoadModel();
 
-            RaisePropertyChanged(new string[] { "Name", "Description", "Topics" });
-            Changes = false;
+            var topics = new ObservableCollection<Topic>(
+                    _context.Db.Table<Model.Topic>()
+                        .Where(t => t.CategoryId == model.Id)
+                        .OrderByDescending(t => t.Activity)
+                        .ToList()
+                        .Select(t => new Topic(t, _context)));
+
+            if (model.Name != _model.Name || model.Description != _model.Description || topics.First().Activity != Topics.First().Activity )
+            {
+                _changedProperties = new string[] { model.Name == _model.Name ? "" : "Name", model.Description == _model.Description ? "" : "Description", topics.First().Activity == Topics.First().Activity ? "" : "Topics" };
+                Changes = true;
+            }
         }
 
         public string Name

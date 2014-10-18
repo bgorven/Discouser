@@ -7,7 +7,12 @@ namespace Discouser.ViewModel
 {
     class Site : ViewModelBase<Model.Site>
     {
-        public override Task Load()
+        public override void NotifyChanges(Model.Site model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task LoadChanges()
         {
             throw new NotImplementedException();
         }

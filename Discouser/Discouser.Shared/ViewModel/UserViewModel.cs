@@ -10,36 +10,30 @@ namespace Discouser.ViewModel
     {
         private UserInfo _info;
 
-        public User(Model.User model, SQLiteConnection db, ApiConnection api) : base(model, db, api)
+        public User(int id, DataContext context) : base(id, context)
         {
-            _info = db.Get<UserInfo>(_model.Id);
+            _info = LoadInfo();
         }
 
-        public User(int id, SQLiteConnection db, ApiConnection api) : base(id, db, api)
+        private UserInfo LoadInfo()
         {
-            _info = db.Get<UserInfo>(_model.Id);
+            return _context.Db.Get<UserInfo>(_model.Id);
         }
 
         public string Username { get { return _model.Username; } }
-
         public string DisplayName { get { return _model.DisplayName; } }
-
         public string Title { get { return _model.Title; } }
-
         public int AvatarId { get { return _model.AvatarId; } }
-
         public string Location { get { return _info.Location; } }
-
         public string Site {  get { return _info.Site; } }
+        public string Bio { get { return new LongText(_info.Bio, _context).Text; } }
 
-        public string Bio { get { return new RawText(_db.Get<Model.RawText>(_info.Bio), _db, _api).Text; } }
-
-        public override async Task Load()
+        public override void NotifyChanges(Model.User model)
         {
-            var model = _db.Get<Model.User>(_model.Id);
-            var info = _db.Get<UserInfo>(_model.Id);
+            model = model ?? LoadModel();
+            var info = LoadInfo();
 
-            RaisePropertyChanged(new String[] {
+            _changedProperties = new String[] {
                 _model.Username == model.Username ? "" : "Username",
                 _model.DisplayName == model.DisplayName ? "" : "DisplayName",
                 _model.Title == model.Title ? "" : "Title",
@@ -47,11 +41,10 @@ namespace Discouser.ViewModel
                 _info.Bio == info.Bio ? "" : "Bio",
                 _info.Location == info.Location ? "" : "Location",
                 _info.Site == info.Site ? "" : "Site"
-            });
+            };
 
             _model = model;
-
-            await Task.FromResult(Changes = false);
+            _info = info;
         }
     }
 }

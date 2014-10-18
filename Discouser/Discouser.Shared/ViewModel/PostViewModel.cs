@@ -1,6 +1,7 @@
 ﻿using Discouser.Api;
 using SQLite;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,111 +10,76 @@ namespace Discouser.ViewModel
 {
     class Post : ViewModelBase<Model.Post>
     {
-        public Post(Model.Post model, SQLiteConnection db, ApiConnection api) : base(model, db, api) { }
-        public Post(int id, SQLiteConnection db, ApiConnection api) : base(id, db, api) { }
-
-        public override async Task Load()
+        public Post(int id, DataContext context) : base(id, context) { }
+        public Post(Model.Post model, DataContext context)
         {
-            var model = _db.Get<Model.Post>(_model.Id);
+            _model = model;
+            _context = context;
+        }
 
-            var rawText = await Task.Run(() => new RawText(_db.Get<Model.RawText>(_model.Text), _db, _api).Text);
+        public override void NotifyChanges(Model.Post model)
+        {
+            model = model ?? LoadModel();
+            var changedProperties = new List<string>();
 
-            if (rawText == _raw_text)
+            var text = model.TextCache ?? new LongText(_model.Text, _context).Text;
+            if (text != Text)
             {
-                _model = model;
-                _raw_text = rawText;
-                RaisePropertyChanged(new string[] { "Text", "RepliesTo", "Html" });
+                Text = text;
+                changedProperties.Add("Text");
             }
 
-            var likeCount = await Task.Run(() => _db.ExecuteScalar<int>("SELECT COUNT(*) FROM SELECT like FROM likes WHERE like.PostId = ?", _model.Id));
-            if (likeCount != _likeCount)
+            var html = model.HtmlCache ?? new LongText(_model.Html, _context).Text;
+            if (text != Text)
             {
-                _likeCount = likeCount;
+                Html = html;
+                changedProperties.Add("Html");
+            }
+
+            if (_context.Db.Table<Model.Reply>().Where(reply => reply.ReplyPostId == _model.Id).Count() != RepliesTo.Count)
+            {
+                RepliesTo = new ObservableCollection<Post>(_context.Db.Table<Model.Reply>()
+                    .Where(reply => reply.ReplyPostId == _model.Id).ToList()
+                    .Select(reply => new Post(reply.OriginalPostId, _context)));
+                changedProperties.Add("RepliesTo");
+            }
+
+            if (_context.Db.Table<Model.Reply>().Where(reply => reply.OriginalPostId == _model.Id).Count() != Replies.Count)
+            {
+                Replies = new ObservableCollection<Post>(_context.Db.Table<Model.Reply>()
+                    .Where(reply => reply.OriginalPostId == _model.Id).ToList()
+                    .Select(reply => new Post(reply.ReplyPostId, _context)));
+                changedProperties.Add("Replies");
+            }
+
+            var likeCount = _context.Db.Table<Model.Like>().Where(like => like.PostId == _model.Id).Count();
+            if (likeCount != LikeCount)
+            {
                 RaisePropertyChanged(new string[] { "LikeCount", "Likes" });
-            }
-
-            var replyCount = await Task.Run(() => _db.ExecuteScalar<int>("SELECT COUNT(*) FROM SELECT reply FROM replies WHERE reply.OriginalPostId = ?", _model.Id));
-            if (replyCount != _replyCount)
-            {
-                _replyCount = replyCount;
-                RaisePropertyChanged(new string[] { "ReplyCount", "Replies" });
             }
 
             Changes = false;
         }
 
-        public User User
-        {
-            get
-            {
-                return new User(_db.Get<Model.User>(_model.UserId), _db, _api);
-            }
-        }
+        public User User { get { return new User(_model.UserId, _context); } }
 
         public DateTime Created
         {
             get { return _model.Created; }
         }
 
-        private string _raw_text;
-        public string RawText { get { return _raw_text; } }
+        public string Text { get; private set; }
 
-        public string Html
-        {
-            get
-            {
-                return _api.GetPostHtml(_model.Id.ToString()).Result;
-            }
-        }
+        public string Html { get; private set; }
 
-        private int _likeCount;
-        public int LikeCount { get { return _likeCount; } }
+        public int LikeCount { get { return Likes.Count; } }
 
-        public ObservableCollection<Like> Likes
-        {
-            get
-            {
-                return new ObservableCollection<Like>(
-                    _db.Table<Model.Like>()
-                    .Where(l => l.PostId == _model.Id)
-                    .ToList()
-                    .Select(model => new Like(model, _db, _api)));
-            }
-        }
+        public ObservableCollection<User> Likes { get; private set; }
 
-        private int _replyCount;
-        public int ReplyCount { get { return _replyCount; } }
+        public int ReplyCount { get { return Replies.Count; } }
 
-        public ObservableCollection<Post> Replies
-        {
-            get
-            {
-                return new ObservableCollection<Post>(
-                    _db.Table<Model.Post>()
-                    .Join(
-                        _db.Table<Model.Reply>().Where(r => r.OriginalPostId == _model.Id),
-                        post => post.Id,
-                        reply => reply.ReplyPostId,
-                        (post, reply) => post)
-                    .ToList()
-                    .Select(post => new Post(post, _db, _api)));
-            }
-        }
+        public ObservableCollection<Post> Replies { get; private set; }
 
-        public ObservableCollection<Post> RepliesTo
-        {
-            get
-            {
-                return new ObservableCollection<Post>(
-                    _db.Table<Model.Post>()
-                    .Join(
-                        _db.Table<Model.Reply>().Where(r => r.ReplyPostId == _model.Id),
-                        post => post.Id,
-                        reply => reply.OriginalPostId,
-                        (post, reply) => post)
-                    .ToList()
-                    .Select(post => new Post(post, _db, _api)));
-            }
-        }
+        public ObservableCollection<Post> RepliesTo { get; private set; }
     }
 }

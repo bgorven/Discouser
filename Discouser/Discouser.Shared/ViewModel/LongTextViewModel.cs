@@ -4,21 +4,13 @@ using System.Threading.Tasks;
 
 namespace Discouser.ViewModel
 {
-    class RawText : ViewModelBase<Model.RawText>
+    class LongText : ViewModelBase<Model.LongText>
     {
-        public RawText(Model.RawText model, SQLiteConnection db, ApiConnection api) : base(model, db, api) { }
-        public RawText(int id, SQLiteConnection db, ApiConnection api) : base(id, db, api) { }
+        public LongText(int id, DataContext context) : base(id, context) { }
 
         private string _text = "";
 
-        /// <summary>
-        /// Not Implemented
-        /// </summary>
-        /// <returns>NotImplementedException</returns>
-        public async override Task Load()
-        {
-            await Task.FromResult(Changes = false);
-        }
+        public override void NotifyChanges(Model.LongText model) { }
 
         public string Text
         {
@@ -30,7 +22,7 @@ namespace Discouser.ViewModel
                     var raw = _model;
                     while (raw.Next.HasValue)
                     {
-                        raw = _db.Get<Model.RawText>(raw.Next.Value);
+                        raw = _context.Db.Get<Model.LongText>(raw.Next.Value);
                         text += raw.Text;
                     }
                     _text = text;

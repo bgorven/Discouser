@@ -10,25 +10,28 @@ namespace Discouser
 {
     class DataContext : IDisposable
     {
-        internal readonly string Name;
-        internal readonly string Site;
-        internal readonly ApiConnection Api;
-        internal readonly SQLiteConnection Db;
-        public Guid LocalGuid { get; private set; }
+        internal ApiConnection Api { get; private set; }
+        internal SQLiteConnection Db { get { return new SQLiteConnection(_dbString); } }
+        internal SQLiteAsyncConnection DbAsync { get { return new SQLiteAsyncConnection(_dbString); } }
+        internal Guid LocalGuid { get; private set; }
+        internal TimeSpan PollDelay { get; set; }
+        private string _dbString;
+        private string _username;
+        private string _sitePath;
 
-        DataContext(string site, string name)
+        DataContext(string url, string username)
         {
-            Name = name;
-            Site = site;
-            Db = new SQLiteConnection(site.Replace("http:", "").Replace("https:", "").Replace("/", "") + "/" + Name + ".db", SQLiteOpenFlags.FullMutex, false);
-            Api = new ApiConnection(site, LocalGuid);
+            _username = username;
+            _sitePath = url;
+            _dbString = url.Replace("http:", "").Replace("https:", "").Replace("/", "") + ":" + _username + ".db";
+            Api = new ApiConnection(url, LocalGuid);
         }
 
         void Initialize()
         {
             Db.CreateTable<Reply>();
             Db.CreateTable<Category>();
-            Db.CreateTable<RawText>();
+            Db.CreateTable<LongText>();
             Db.CreateTable<Topic>();
             Db.CreateTable<Like>();
             Db.CreateTable<Post>();
@@ -51,10 +54,10 @@ namespace Discouser
         {
             if (!string.IsNullOrEmpty(password))
             {
-                await Api.PostSession(login: Name, password: password);
+                await Api.PostSession(login: _username, password: password);
             }
 
-            return ((await Api.GetSessionCurrent()) ?? new Session()).Username == Name;
+            return ((await Api.GetSessionCurrent()) ?? new Session()).Username == _username;
         }
 
         public async Task<ICollection<Category>> AllCategories()
@@ -67,8 +70,6 @@ namespace Discouser
         }
 
         private volatile ViewModel.Topic _topicToWatch = null;
-
-        public TimeSpan PollDelay { get; set; }
 
         /// <summary>
         /// Polls message bus for information about the active topic, updates the db if new information has arrived,

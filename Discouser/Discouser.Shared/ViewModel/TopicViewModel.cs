@@ -4,29 +4,32 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Discouser.Model;
 
 namespace Discouser.ViewModel
 {
     class Topic : ViewModelBase<Model.Topic>
     {
-        public Topic(Model.Topic model, SQLiteConnection db, ApiConnection api) : base(model, db, api) { }
-        public Topic(int id, SQLiteConnection db, ApiConnection api) : base(id, db, api) { }
 
-        public override async Task Load()
+        public Topic(int id, DataContext context) : base(id, context) { }
+
+        public Topic(Model.Topic model, DataContext context)
         {
-            _model = _db.Get<Model.Topic>(_model.Id);
-            Posts = await Task.Run(() =>
-            {
-                return new ObservableCollection<Post>(
-                    _db.Table<Model.Post>()
+            _model = model;
+            _context = context;
+        }
+
+        public override void NotifyChanges(Model.Topic model)
+        {
+            _model = _context.Db.Get<Model.Topic>(_model.Id);
+            Posts = new ObservableCollection<Post>(
+                    _context.Db.Table<Model.Post>()
                     .Where(t => t.TopicId == _model.Id)
                     .OrderByDescending(t => t.Created)
                     .ToList()
-                    .Select(p => new Post(p, _db, _api)));
-            });
+                    .Select(p => new Post(p, _context)));
 
-            RaisePropertyChanged(new string[] { "Name", "CategoryId", "Activity", "Posts" });
-            Changes = false;
+            _changedProperties = new string[] { "Name", "CategoryId", "Activity", "Posts" };
         }
 
         public int Id { get { return _model.Id; } }
