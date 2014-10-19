@@ -19,10 +19,11 @@ namespace Discouser
         public string Username { get; private set; }
         internal string Site { get; private set; }
 
-        public DataContext(string url, string username)
+        public DataContext(string url, string username, Guid localGuid)
         {
             Site = url;
             Username = username;
+            LocalGuid = localGuid;
             Api = new ApiConnection(url, LocalGuid);
         }
 
@@ -69,18 +70,6 @@ namespace Discouser
             Db.CreateTable<Like>();
             Db.CreateTable<Post>();
             Db.CreateTable<User>();
-
-            var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings.Values;
-            var guid = localSettings["Guid"];
-            if (guid == null)
-            {
-                LocalGuid = Guid.NewGuid();
-                localSettings["Guid"] = LocalGuid;
-            }
-            else
-            {
-                LocalGuid = (Guid)guid;
-            }
         }
 
         public async Task<ICollection<Category>> AllCategories()
