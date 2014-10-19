@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 
 namespace Discouser.ViewModel
 {
-    class AllSites
+    class AllSites : IDisposable
     {
         public ObservableCollection<Site> Sites { get; private set; }
 
@@ -17,7 +16,7 @@ namespace Discouser.ViewModel
         {
             var roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings.Values;
             logins = (List<Tuple<string,string>>)roamingSettings[loginSettingsKey] ?? new List<Tuple<string, string>>();
-            Sites = new ObservableCollection<Site>(logins.Select(l => new Site(l.Item1, l.Item2)));
+            Sites = new ObservableCollection<Site>(logins.Select(l => new Site(new DataContext(l.Item1, l.Item2))));
         }
 
         public void AddSite(string url, string username)
@@ -30,8 +29,27 @@ namespace Discouser.ViewModel
             if (!logins.Contains(login))
             {
                 logins.Add(login);
-                Sites.Add(new Site(login.Item1, login.Item2));
+                Sites.Add(new Site(new DataContext(login.Item1, login.Item2)));
                 Windows.Storage.ApplicationData.Current.RoamingSettings.Values[loginSettingsKey] = logins;
+            }
+        }
+
+        /// <summary>
+        /// Removes a site from the list of sites, and disposes its data context.
+        /// </summary>
+        /// <param name="siteToRemove"></param>
+        public void RemoveSite(Site siteToRemove)
+        {
+            Sites.Remove(siteToRemove);
+            logins.RemoveAll(login => login.Item1 == siteToRemove.Url && login.Item2 == siteToRemove.Username);
+            siteToRemove.Context.Dispose();
+        }
+
+        public void Dispose()
+        {
+            foreach (var site in Sites)
+            {
+                site.Context.Dispose();
             }
         }
     }

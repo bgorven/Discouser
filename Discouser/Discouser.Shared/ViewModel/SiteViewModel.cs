@@ -7,10 +7,9 @@ namespace Discouser.ViewModel
 {
     class Site : ViewModelBase<Model.Site>
     {
-        public Site(string url, string username)
+        public Site(DataContext context)
         {
-            Url = url;
-            _context = new DataContext(url, username);
+            _context = context;
         }
 
         public override void NotifyChanges(Model.Site model)
@@ -23,7 +22,11 @@ namespace Discouser.ViewModel
             throw new NotImplementedException();
         }
 
-        public string Url { get; private set; }
+        public DataContext Context { get { return _context; } }
+
+        public string Url { get { return _context.Site; } }
+
+        public string Username { get { return _context.Username; } }
 
         public string Name { get; private set; }
     }

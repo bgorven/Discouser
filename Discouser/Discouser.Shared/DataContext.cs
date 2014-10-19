@@ -15,16 +15,49 @@ namespace Discouser
         internal SQLiteAsyncConnection DbAsync { get { return new SQLiteAsyncConnection(_dbString); } }
         internal Guid LocalGuid { get; private set; }
         internal TimeSpan PollDelay { get; set; }
-        private string _dbString;
-        private string _username;
-        private string _sitePath;
+        private string _dbString { get { return Site.Replace("http:", "").Replace("https:", "").Replace("/", "") + ":" + Username + ".db"; } }
+        public string Username { get; private set; }
+        internal string Site { get; private set; }
 
         public DataContext(string url, string username)
         {
-            _username = username;
-            _sitePath = url;
-            _dbString = url.Replace("http:", "").Replace("https:", "").Replace("/", "") + ":" + _username + ".db";
+            Site = url;
+            Username = username;
             Api = new ApiConnection(url, LocalGuid);
+        }
+
+        /// <summary>
+        /// Attempts to login with the login username and password if supplied, or the authorization
+        /// token stored in the HttpClient's cookies.
+        /// </summary>
+        /// <param name="username">The user name to log in with. If not null, sets the username property this DataContext
+        /// will use for local db connections. If null, the contents of the username property will be used. If the property
+        /// is also null, the site will be queried and the name of the currently logged in session will be returned.
+        /// </param>
+        /// <param name="password">If username and password are not null, will log in using the supplied credentials.</param>
+        /// <returns>The name of the logged in session, or null if no session is active.</returns>
+        async Task<string> Authorize(string username = null, string password = null)
+        {
+            if (username != null)
+            {
+                Username = username;
+            }
+
+            if (Username != null && password != null)
+            {
+                await Api.PostSession(login: Username, password: password);
+            }
+
+            var session = await Api.GetSessionCurrent();
+
+            if (session != null && session.Username == Username)
+            {
+                return Username;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         void Initialize()
@@ -48,16 +81,6 @@ namespace Discouser
             {
                 LocalGuid = (Guid)guid;
             }
-        }
-
-        async Task<bool> Authorize(string password)
-        {
-            if (!string.IsNullOrEmpty(password))
-            {
-                await Api.PostSession(login: _username, password: password);
-            }
-
-            return ((await Api.GetSessionCurrent()) ?? new Session()).Username == _username;
         }
 
         public async Task<ICollection<Category>> AllCategories()
