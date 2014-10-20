@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Input;
 
 namespace Discouser.ViewModel
 {
@@ -27,11 +28,24 @@ namespace Discouser.ViewModel
             LocalGuid = (Guid)localSettings[guidSettingsKey];
 
             Sites = new ObservableCollection<Site>(logins.Select(l => new Site(new DataContext(l.Item1, l.Item2, (Guid)LocalGuid))));
+
+            NewSiteCommand = new Command(CanAddNewSite, AddNewSite);
         }
 
-        public void AddSite(string url, string username)
+        private bool CanAddNewSite()
         {
-            AddSite(Tuple.Create(url, username));
+            return !string.IsNullOrEmpty(NewSiteUrl)
+                && Uri.IsWellFormedUriString(NewSiteUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? NewSiteUrl : "http://" + NewSiteUrl, UriKind.Absolute)
+                && !string.IsNullOrEmpty(NewSiteUsername)
+                && !string.IsNullOrEmpty(NewSitePassword);
+        }
+
+        private void AddNewSite()
+        {
+            AddSite(Tuple.Create(NewSiteUrl, NewSiteUsername));
+            NewSiteUrl = "";
+            NewSiteUsername = "";
+            NewSitePassword = "";
         }
 
         private void AddSite(Tuple<string, string> login)
@@ -60,6 +74,36 @@ namespace Discouser.ViewModel
             foreach (var site in Sites)
             {
                 site.Context.Dispose();
+            }
+        }
+
+        public Command NewSiteCommand { get; private set; }
+        private string _newSiteUsername;
+        public string NewSiteUsername { get { return _newSiteUsername; }
+            set
+            {
+                NewSiteCommand.Notify();
+                _newSiteUsername = value;
+            }
+        }
+        private string _newSitePassword;
+        public string NewSitePassword
+        {
+            get { return _newSitePassword; }
+            set
+            {
+                NewSiteCommand.Notify();
+                _newSitePassword = value;
+            }
+        }
+        private string _newSiteUrl;
+        public string NewSiteUrl
+        {
+            get { return _newSiteUrl; }
+            set
+            {
+                NewSiteCommand.Notify();
+                _newSiteUrl = value;
             }
         }
     }

@@ -62,15 +62,12 @@
                     <Button.Flyout>
                         <Flyout>
                             <StackPanel Width="256">
-                                <TextBox x:Name="NewSiteUrl" TextWrapping="Wrap" PlaceholderText="meta.discourse.org"/>
-                                <TextBox x:Name="NewSiteUsername" TextWrapping="Wrap" Margin="0,5,0,5"/>
-                                <PasswordBox x:Name="NewSitePassword" PlaceholderText="●●●●●●●"/>
+                                <TextBox x:Name="NewSiteUrl" TextWrapping="Wrap" PlaceholderText="meta.discourse.org" Text="{Binding NewSiteUrl, Mode=TwoWay}"/>
+                                <TextBox x:Name="NewSiteUsername" TextWrapping="Wrap" Margin="0,5,0,5" Text="{Binding NewSiteUsername, Mode=TwoWay}"/>
+                                <PasswordBox x:Name="NewSitePassword" PlaceholderText="●●●●●●●" Password="{Binding NewSitePassword, Mode=TwoWay}"/>
                                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button x:Name="NewSiteAddButton" HorizontalAlignment="Stretch" >
-                                        <Image Height="19" Source="Images/check.png" Stretch="Fill" Width="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Button>
-                                    <Button x:Name="NewSiteCancelButton" HorizontalAlignment="Stretch" >
-                                        <Image Height="19" Source="Images/cancel.png" Stretch="Fill" Width="19"/>
+                                    <Button x:Name="NewSiteAddButton" Command="{Binding NewSiteCommand}">
+                                        <Image Height="19" Source="Images/next.png" Stretch="Fill" Width="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Button>
                                 </StackPanel>
                             </StackPanel>
