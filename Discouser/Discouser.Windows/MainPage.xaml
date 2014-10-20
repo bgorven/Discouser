@@ -5,9 +5,53 @@
     xmlns:local="using:Discouser"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d" d:DataContext="{d:DesignData /SampleData/AllSitesSampleData.xaml}">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    </Grid>
+    <Page.Resources>
+        <DataTemplate x:Key="SiteTemplate">
+            
+        </DataTemplate>
+    </Page.Resources>
+	<Page.TopAppBar>
+		<AppBar FontFamily="Global User Interface">
+			<Grid HorizontalAlignment="Stretch" Height="66">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="66"/>
+				</Grid.ColumnDefinitions>
+				<ListView ItemsSource="{Binding Sites}" Width="728" Grid.Column="0"
+					ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
+					ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Left"  >
+					<ListView.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel
+								Orientation="Horizontal" />
+						</ItemsPanelTemplate>
+					</ListView.ItemsPanel>
+				</ListView>
+				<Button x:Name="NewSiteButton" 
+				HorizontalAlignment="Left" VerticalAlignment="Stretch"  Grid.Column="1" Margin="0,0,0,-2">
+					<Button.Flyout>
+						<Flyout>
+							<StackPanel Width="256">
+								<TextBox x:Name="NewSiteUrl" TextWrapping="Wrap" PlaceholderText="meta.discourse.org"/>
+								<TextBox x:Name="NewSiteUsername" TextWrapping="Wrap" Margin="0,5,0,5"/>
+								<PasswordBox x:Name="NewSitePassword" PlaceholderText="●●●●●●●"/>
+								<StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
+									<Button x:Name="NewSiteAddButton" HorizontalAlignment="Stretch" >
+										<Image Height="19" Source="Images/check.png" Stretch="Fill" Width="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+									</Button>
+									<Button x:Name="NewSiteCancelButton" HorizontalAlignment="Stretch" >
+										<Image Height="19" Source="Images/cancel.png" Stretch="Fill" Width="19"/>
+									</Button>
+								</StackPanel>
+							</StackPanel>
+						</Flyout>
+					</Button.Flyout>
+					<Image Height="76" Source="Images/add.png" Stretch="Fill" Width="76" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+				</Button>
+			</Grid>
+		</AppBar>
+	</Page.TopAppBar>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"/>
 </Page>

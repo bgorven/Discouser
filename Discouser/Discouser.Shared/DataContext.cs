@@ -15,13 +15,14 @@ namespace Discouser
         internal SQLiteAsyncConnection DbAsync { get { return new SQLiteAsyncConnection(_dbString); } }
         internal Guid LocalGuid { get; private set; }
         internal TimeSpan PollDelay { get; set; }
-        private string _dbString { get { return Site.Replace("http:", "").Replace("https:", "").Replace("/", "") + ":" + Username + ".db"; } }
+        private string _dbString { get { return SiteUrl.Replace("http:", "").Replace("https:", "").Replace("/", "") + ":" + Username + ".db"; } }
         public string Username { get; private set; }
-        internal string Site { get; private set; }
+        internal string SiteUrl { get; private set; }
+        public string SiteName { get; internal set; }
 
         public DataContext(string url, string username, Guid localGuid)
         {
-            Site = url;
+            SiteUrl = url;
             Username = username;
             LocalGuid = localGuid;
             Api = new ApiConnection(url, LocalGuid);
@@ -63,6 +64,7 @@ namespace Discouser
 
         void Initialize()
         {
+            Db.CreateTable<Site>();
             Db.CreateTable<Reply>();
             Db.CreateTable<Category>();
             Db.CreateTable<LongText>();
@@ -70,6 +72,7 @@ namespace Discouser
             Db.CreateTable<Like>();
             Db.CreateTable<Post>();
             Db.CreateTable<User>();
+            Db.CreateTable<UserInfo>();
         }
 
         public async Task<ICollection<Category>> AllCategories()

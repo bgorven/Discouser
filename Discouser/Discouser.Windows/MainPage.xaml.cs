@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Discouser.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,7 +25,8 @@ namespace Discouser
     {
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            DataContext = new AllSites();
         }
     }
 }

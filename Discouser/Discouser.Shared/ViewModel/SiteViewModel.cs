@@ -24,10 +24,10 @@ namespace Discouser.ViewModel
 
         public DataContext Context { get { return _context; } }
 
-        public string Url { get { return _context.Site; } }
+        public string Url { get { return _context.SiteUrl; } }
 
         public string Username { get { return _context.Username; } }
 
-        public string Name { get; private set; }
+        public string Name { get { return _context.SiteName ?? _context.SiteUrl; } }
     }
 }
