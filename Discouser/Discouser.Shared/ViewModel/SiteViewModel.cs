@@ -7,6 +7,7 @@ namespace Discouser.ViewModel
 {
     class Site : ViewModelBase<Model.Site>
     {
+        public Site() : this(new DataContext()) { }
         public Site(DataContext context)
         {
             _context = context;
@@ -28,6 +29,8 @@ namespace Discouser.ViewModel
 
         public string Username { get { return _context.Username; } }
 
-        public string Name { get { return _context.SiteName ?? _context.SiteUrl; } }
+        public string Logo { get { return _context.FolderName + "Logo.png"; } }
+
+        public string SiteName { get { return _context.SiteName ?? _context.SiteUrl; } }
     }
 }

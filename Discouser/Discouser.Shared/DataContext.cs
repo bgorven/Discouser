@@ -15,7 +15,9 @@ namespace Discouser
         internal SQLiteAsyncConnection DbAsync { get { return new SQLiteAsyncConnection(_dbString); } }
         internal Guid LocalGuid { get; private set; }
         internal TimeSpan PollDelay { get; set; }
-        private string _dbString { get { return SiteUrl.Replace("http:", "").Replace("https:", "").Replace("/", "") + ":" + Username + ".db"; } }
+        internal string FolderName { get { return SiteUrl.Replace("http:", "").Replace("https:", "").Replace("/", "") + "\\"; } }
+        private string _dbString { get { return FolderName + Username + ".db"; } }
+
         public string Username { get; private set; }
         internal string SiteUrl { get; private set; }
         public string SiteName { get; internal set; }
@@ -27,6 +29,9 @@ namespace Discouser
             LocalGuid = localGuid;
             Api = new ApiConnection(url, LocalGuid);
         }
+
+        public DataContext() : this("meta.discourse.org", "", Guid.Empty) { }
+
 
         /// <summary>
         /// Attempts to login with the login username and password if supplied, or the authorization

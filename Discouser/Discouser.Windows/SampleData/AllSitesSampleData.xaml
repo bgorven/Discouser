@@ -1,0 +1,54 @@
+﻿<ViewModel:AllSites xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser">
+	<ViewModel:AllSites.Sites>
+		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Duis phasellus" Url="http://www.adatum.com/" Username="Aliquam cras praesent accumsan etiam">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Vestibulum class curabitur nam sed"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+        <ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Adipiscing dictumst ante mauris" Url="http://www.adventure-works.com/" Username="Dis aenean lorem">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Nunc amet"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+        <ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Dignissim nulla est proin" Url="http://www.adventure-works.com/" Username="Eget auctor elit convallis">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Morbi integer arcu nullam"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Hac fermentum" Url="http://www.alpineskihouse.com/" Username="Facilisi facilisis parturient vestibulum quisque">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Elementum augue enim"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Lectus habitasse vivamus dolor" Url="http://www.blueyonderairlines.com/" Username="Fringilla leo eros">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Vestibulum erat"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Nisl mus nunc felis ipsum" Url="http://www.cpandl.com/" Username="Aliquet nisi fames">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Nibh faucibus"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Adipiscing odio parturient" Url="http://www.cohovineyard.com/" Username="Justo magnis vestibulum">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Blandit commodo litora conubia"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Mollis per" Url="http://www.cohowinery.com/" Username="Mauris nec non">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Lacus mattis orci lorem"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Hendrerit dapibus" Url="http://www.contoso.com/" Username="Interdum sem massa">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Magna montes sed"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Sit vel" Url="http://www.consolidatedmessenger.com/" Username="Nascetur ornare feugiat">
+			<ViewModel:Site.Context>
+				<Discouser:DataContext Username="Pede metus morbi egestas euismod"/>
+			</ViewModel:Site.Context>
+		</ViewModel:Site>
+	</ViewModel:AllSites.Sites>
+</ViewModel:AllSites>

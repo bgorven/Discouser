@@ -8,50 +8,78 @@
     mc:Ignorable="d" d:DataContext="{d:DesignData /SampleData/AllSitesSampleData.xaml}">
 
     <Page.Resources>
-        <DataTemplate x:Key="SiteTemplate">
-            
+        <DataTemplate x:Key="SiteAppbarItemTemplate">
+            <Canvas >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Username}" />
+                    <TextBlock Text="@" />
+                    <TextBlock Text="{Binding SiteName}" />
+                </StackPanel>
+            </Canvas>
         </DataTemplate>
+
+        <local:BooleanToVisibilityConverter x:Key="VisiblityConverter" />
     </Page.Resources>
-	<Page.TopAppBar>
-		<AppBar FontFamily="Global User Interface">
-			<Grid HorizontalAlignment="Stretch" Height="66">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="*"/>
-					<ColumnDefinition Width="66"/>
-				</Grid.ColumnDefinitions>
-				<ListView ItemsSource="{Binding Sites}" Width="728" Grid.Column="0"
+    <Page.TopAppBar>
+        <AppBar FontFamily="Global User Interface">
+            <Grid HorizontalAlignment="Stretch" Height="76">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="66"/>
+                </Grid.ColumnDefinitions>
+                <!-- ItemTemplate="{StaticResource SiteAppbarItemTemplate}" -->
+                <ListView ItemsSource="{Binding Sites}"  Grid.Column="0"
 					ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
 					ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Left"  >
-					<ListView.ItemsPanel>
-						<ItemsPanelTemplate>
-							<StackPanel
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel
 								Orientation="Horizontal" />
-						</ItemsPanelTemplate>
-					</ListView.ItemsPanel>
-				</ListView>
-				<Button x:Name="NewSiteButton" 
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Canvas Width="244" Height="66">
+                                <Canvas.Background>
+                                    <ImageBrush ImageSource="{Binding Logo}"/>
+                                </Canvas.Background>
+                                <StackPanel Width="244">
+                                    <StackPanel.Background>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <GradientStop Color="#FF646464" Offset="0"/>
+                                            <GradientStop Color="Transparent" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </StackPanel.Background>
+                                    <TextBlock Text="{Binding Username}" />
+                                    <TextBlock Text="{Binding SiteName}" />
+                                </StackPanel>
+                            </Canvas>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <Button x:Name="NewSiteButton" 
 				HorizontalAlignment="Left" VerticalAlignment="Stretch"  Grid.Column="1" Margin="0,0,0,-2">
-					<Button.Flyout>
-						<Flyout>
-							<StackPanel Width="256">
-								<TextBox x:Name="NewSiteUrl" TextWrapping="Wrap" PlaceholderText="meta.discourse.org"/>
-								<TextBox x:Name="NewSiteUsername" TextWrapping="Wrap" Margin="0,5,0,5"/>
-								<PasswordBox x:Name="NewSitePassword" PlaceholderText="●●●●●●●"/>
-								<StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
-									<Button x:Name="NewSiteAddButton" HorizontalAlignment="Stretch" >
-										<Image Height="19" Source="Images/check.png" Stretch="Fill" Width="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-									</Button>
-									<Button x:Name="NewSiteCancelButton" HorizontalAlignment="Stretch" >
-										<Image Height="19" Source="Images/cancel.png" Stretch="Fill" Width="19"/>
-									</Button>
-								</StackPanel>
-							</StackPanel>
-						</Flyout>
-					</Button.Flyout>
-					<Image Height="76" Source="Images/add.png" Stretch="Fill" Width="76" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-				</Button>
-			</Grid>
-		</AppBar>
-	</Page.TopAppBar>
+                    <Button.Flyout>
+                        <Flyout>
+                            <StackPanel Width="256">
+                                <TextBox x:Name="NewSiteUrl" TextWrapping="Wrap" PlaceholderText="meta.discourse.org"/>
+                                <TextBox x:Name="NewSiteUsername" TextWrapping="Wrap" Margin="0,5,0,5"/>
+                                <PasswordBox x:Name="NewSitePassword" PlaceholderText="●●●●●●●"/>
+                                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="NewSiteAddButton" HorizontalAlignment="Stretch" >
+                                        <Image Height="19" Source="Images/check.png" Stretch="Fill" Width="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Button>
+                                    <Button x:Name="NewSiteCancelButton" HorizontalAlignment="Stretch" >
+                                        <Image Height="19" Source="Images/cancel.png" Stretch="Fill" Width="19"/>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                    <Image Height="76" Source="Images/add.png" Stretch="Fill" Width="76" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
+            </Grid>
+        </AppBar>
+    </Page.TopAppBar>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"/>
 </Page>
