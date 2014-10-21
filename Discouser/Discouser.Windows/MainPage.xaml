@@ -9,19 +9,12 @@
 
     <Page.Resources>
         <DataTemplate x:Key="SiteAppbarItemTemplate">
-            <Canvas >
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Username}" />
-                    <TextBlock Text="@" />
-                    <TextBlock Text="{Binding SiteName}" />
-                </StackPanel>
-            </Canvas>
         </DataTemplate>
-
+        
         <local:BooleanToVisibilityConverter x:Key="VisiblityConverter" />
     </Page.Resources>
     <Page.TopAppBar>
-        <AppBar FontFamily="Global User Interface">
+        <AppBar>
             <Grid HorizontalAlignment="Stretch" Height="76">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -62,10 +55,17 @@
                     <Button.Flyout>
                         <Flyout>
                             <StackPanel Width="256">
-                                <TextBox x:Name="NewSiteUrl" TextWrapping="Wrap" PlaceholderText="meta.discourse.org" Text="{Binding NewSiteUrl, Mode=TwoWay}"/>
-                                <TextBox x:Name="NewSiteUsername" TextWrapping="Wrap" Margin="0,5,0,5" Text="{Binding NewSiteUsername, Mode=TwoWay}"/>
+                                <TextBox x:Name="NewSiteUrl" TextWrapping="Wrap" PlaceholderText="meta.discourse.org" InputScope="Url" Text="{Binding NewSiteUrl, Mode=TwoWay}"/>
+                                <TextBox x:Name="NewSiteUsername" TextWrapping="Wrap" Margin="0,5,0,5" Text="{Binding NewSiteUsername, Mode=TwoWay}">
+                                </TextBox>
                                 <PasswordBox x:Name="NewSitePassword" PlaceholderText="●●●●●●●" Password="{Binding NewSitePassword, Mode=TwoWay}"/>
                                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Canvas Background="Red" Width="25" Height="25" Visibility="{Binding NewSiteFailedToAuthorize, Converter={StaticResource VisiblityConverter}}">
+                                        <TextBlock Width="25" Height="25" TextAlignment="Center" FontSize="22" FontWeight="Bold" Foreground="White">
+                                        !
+                                        </TextBlock>
+                                    </Canvas>
+                                    <ProgressRing Width="25" Height="25" Margin="0,0,3,0" IsActive="{Binding NewSiteLoading}" Visibility="{Binding NewSiteLoading, Converter={StaticResource VisiblityConverter}}" />
                                     <Button x:Name="NewSiteAddButton" Command="{Binding NewSiteCommand}">
                                         <Image Height="19" Source="Images/next.png" Stretch="Fill" Width="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Button>

@@ -13,6 +13,18 @@ namespace Discouser.ViewModel
             _context = context;
         }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as Site;
+            if (other == null) return false;
+            return Url == other.Url && Username == other.Username;
+        }
+
+        public override int GetHashCode()
+        {
+            return Url.GetHashCode() ^ Username.GetHashCode();
+        }
+
         public override void NotifyChanges(Model.Site model)
         {
             throw new NotImplementedException();

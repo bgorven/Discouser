@@ -15,12 +15,12 @@ namespace Discouser.ViewModel
         internal ViewModelBase(int id, DataContext context)
         {
             _context = context;
-            _model = _context.Db.Get<TModel>(id);
+            _model = _context.PersistentDbConnection.Get<TModel>(id);
         }
 
         internal TModel LoadModel()
         {
-            return _context.Db.Get<TModel>(_model.Id);
+            return _context.PersistentDbConnection.Get<TModel>(_model.Id);
         }
 
         private volatile bool _changes = false;

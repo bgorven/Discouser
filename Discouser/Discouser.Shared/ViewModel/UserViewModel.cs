@@ -17,7 +17,7 @@ namespace Discouser.ViewModel
 
         private UserInfo LoadInfo()
         {
-            return _context.Db.Get<UserInfo>(_model.Id);
+            return _context.PersistentDbConnection.Get<UserInfo>(_model.Id);
         }
 
         public string Username { get { return _model.Username; } }

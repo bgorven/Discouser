@@ -21,9 +21,9 @@ namespace Discouser.ViewModel
 
         public override void NotifyChanges(Model.Topic model)
         {
-            _model = _context.Db.Get<Model.Topic>(_model.Id);
+            _model = _context.PersistentDbConnection.Get<Model.Topic>(_model.Id);
             Posts = new ObservableCollection<Post>(
-                    _context.Db.Table<Model.Post>()
+                    _context.PersistentDbConnection.Table<Model.Post>()
                     .Where(t => t.TopicId == _model.Id)
                     .OrderByDescending(t => t.Created)
                     .ToList()

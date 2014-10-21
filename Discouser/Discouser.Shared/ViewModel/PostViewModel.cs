@@ -36,23 +36,23 @@ namespace Discouser.ViewModel
                 changedProperties.Add("Html");
             }
 
-            if (_context.Db.Table<Model.Reply>().Where(reply => reply.ReplyPostId == _model.Id).Count() != RepliesTo.Count)
+            if (_context.PersistentDbConnection.Table<Model.Reply>().Where(reply => reply.ReplyPostId == _model.Id).Count() != RepliesTo.Count)
             {
-                RepliesTo = new ObservableCollection<Post>(_context.Db.Table<Model.Reply>()
+                RepliesTo = new ObservableCollection<Post>(_context.PersistentDbConnection.Table<Model.Reply>()
                     .Where(reply => reply.ReplyPostId == _model.Id).ToList()
                     .Select(reply => new Post(reply.OriginalPostId, _context)));
                 changedProperties.Add("RepliesTo");
             }
 
-            if (_context.Db.Table<Model.Reply>().Where(reply => reply.OriginalPostId == _model.Id).Count() != Replies.Count)
+            if (_context.PersistentDbConnection.Table<Model.Reply>().Where(reply => reply.OriginalPostId == _model.Id).Count() != Replies.Count)
             {
-                Replies = new ObservableCollection<Post>(_context.Db.Table<Model.Reply>()
+                Replies = new ObservableCollection<Post>(_context.PersistentDbConnection.Table<Model.Reply>()
                     .Where(reply => reply.OriginalPostId == _model.Id).ToList()
                     .Select(reply => new Post(reply.ReplyPostId, _context)));
                 changedProperties.Add("Replies");
             }
 
-            var likeCount = _context.Db.Table<Model.Like>().Where(like => like.PostId == _model.Id).Count();
+            var likeCount = _context.PersistentDbConnection.Table<Model.Like>().Where(like => like.PostId == _model.Id).Count();
             if (likeCount != LikeCount)
             {
                 RaisePropertyChanged(new string[] { "LikeCount", "Likes" });

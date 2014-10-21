@@ -16,7 +16,7 @@ namespace Discouser.ViewModel
             model = model ?? LoadModel();
 
             var topics = new ObservableCollection<Topic>(
-                    _context.Db.Table<Model.Topic>()
+                    _context.PersistentDbConnection.Table<Model.Topic>()
                         .Where(t => t.CategoryId == model.Id)
                         .OrderByDescending(t => t.Activity)
                         .ToList()

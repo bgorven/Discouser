@@ -5,22 +5,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discouser.Api;
 using Discouser.Model;
+using System.IO;
+using Windows.Storage;
 
 namespace Discouser
 {
     class DataContext : IDisposable
     {
         internal ApiConnection Api { get; private set; }
-        internal SQLiteConnection Db { get { return new SQLiteConnection(_dbString); } }
-        internal SQLiteAsyncConnection DbAsync { get { return new SQLiteAsyncConnection(_dbString); } }
+        internal SQLiteConnection PersistentDbConnection { get; private set; }
+        internal SQLiteConnection NewDbConnection() {  return new SQLiteConnection(_dbString); }
+        internal SQLiteAsyncConnection NewAsyncDbConnection() {  return new SQLiteAsyncConnection(_dbString); }
         internal Guid LocalGuid { get; private set; }
         internal TimeSpan PollDelay { get; set; }
-        internal string FolderName { get { return SiteUrl.Replace("http:", "").Replace("https:", "").Replace("/", "") + "\\"; } }
-        private string _dbString { get { return FolderName + Username + ".db"; } }
+        internal string FolderName { get; private set; }
+        private string _dbString;
 
         public string Username { get; private set; }
         internal string SiteUrl { get; private set; }
-        public string SiteName { get; internal set; }
+        public string SiteName { get; private set; }
+        public StorageFolder StorageDir { get; private set; }
 
         public DataContext(string url, string username, Guid localGuid)
         {
@@ -28,6 +32,7 @@ namespace Discouser
             Username = username;
             LocalGuid = localGuid;
             Api = new ApiConnection(url, LocalGuid);
+            FolderName = SiteUrl.Replace("http:", "").Replace("https:", "").Replace("/", "");
         }
 
         public DataContext() : this("meta.discourse.org", "", Guid.Empty) { }
@@ -43,7 +48,7 @@ namespace Discouser
         /// </param>
         /// <param name="password">If username and password are not null, will log in using the supplied credentials.</param>
         /// <returns>The name of the logged in session, or null if no session is active.</returns>
-        async Task<string> Authorize(string username = null, string password = null)
+        internal async Task<string> Authorize(string username = null, string password = null)
         {
             if (username != null)
             {
@@ -67,26 +72,36 @@ namespace Discouser
             }
         }
 
-        void Initialize()
+        internal async Task Initialize()
         {
-            Db.CreateTable<Site>();
-            Db.CreateTable<Reply>();
-            Db.CreateTable<Category>();
-            Db.CreateTable<LongText>();
-            Db.CreateTable<Topic>();
-            Db.CreateTable<Like>();
-            Db.CreateTable<Post>();
-            Db.CreateTable<User>();
-            Db.CreateTable<UserInfo>();
+            StorageDir = await ApplicationData.Current.RoamingFolder.CreateFolderAsync(FolderName, CreationCollisionOption.OpenIfExists);
+            _dbString = Path.Combine(StorageDir.Path, Username + ".db");
+
+            PersistentDbConnection = NewDbConnection();
+
+            var db = NewAsyncDbConnection();
+
+            await Task.WhenAll(new Task[] {
+                db.CreateTableAsync<Category>(),
+                db.CreateTableAsync<LongText>(),
+                db.CreateTableAsync<UserInfo>(),
+                db.CreateTableAsync<Topic>(),
+                db.CreateTableAsync<Reply>(),
+                db.CreateTableAsync<Like>(),
+                db.CreateTableAsync<Post>(),
+                db.CreateTableAsync<User>(),
+                db.CreateTableAsync<Site>(),
+            });
         }
 
         public async Task<ICollection<Category>> AllCategories()
         {
             var categories = await Api.GetCategories();
 
-            Db.InsertAll(categories, "OR REPLACE");
+            var db = NewDbConnection();
+            db.InsertAll(categories, "OR REPLACE");
 
-            return Db.Table<Category>().ToList();
+            return db.Table<Category>().ToList();
         }
 
         private volatile ViewModel.Topic _topicToWatch = null;
@@ -159,37 +174,42 @@ namespace Discouser
 
         private void LatestTopicMessage(int topicId, int messageId)
         {
-            var topic = Db.Get<Topic>(topicId);
+            var db = NewDbConnection();
+            var topic = db.Get<Topic>(topicId);
             if (topic != null)
             {
                 topic.LatestMessage = messageId;
-                Db.Update(topic);
+                db.Update(topic);
             }
         }
 
         private void DeletePost(int postId)
         {
-            var post = Db.Get<Post>(postId);
+            var db = NewDbConnection();
+            var post = db.Get<Post>(postId);
             if (post != null)
             {
                 post.Deleted = true;
-                Db.Update(post);
+                db.Update(post);
             }
         }
 
         private async Task DownloadLikes(int id)
         {
-            Db.InsertAll(await Api.GetLikes(id: id), "OR REPLACE");
+            var db = NewDbConnection();
+            db.InsertAll(await Api.GetLikes(id: id), "OR REPLACE");
         }
 
         private async Task DownloadPost(int id)
         {
-            Db.InsertOrReplace(await Api.GetPost(id));
+            var db = NewDbConnection();
+            db.InsertOrReplace(await Api.GetPost(id));
         }
 
         public void Dispose()
         {
-            Db.Dispose();
+            var db = NewDbConnection();
+            db.Dispose();
             Api.Dispose();
         }
     }

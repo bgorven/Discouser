@@ -2,23 +2,25 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Foundation.Collections;
 
 namespace Discouser.ViewModel
 {
-    class AllSites : IDisposable
+    class AllSites : ViewModelBase<Model.Site>, IDisposable
     {
         public ObservableCollection<Site> Sites { get; private set; }
 
         private const string loginSettingsKey = "logins";
         private const string guidSettingsKey = "Guid";
-        public List<Tuple<string,string>> logins;
         private Guid LocalGuid;
+        private IPropertySet Logins;
 
         public AllSites()
         {
-            var roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings.Values;
-            logins = roamingSettings[loginSettingsKey] as List<Tuple<string, string>> ?? new List<Tuple<string, string>>();
+            var roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+            Logins = roamingSettings.CreateContainer(loginSettingsKey, Windows.Storage.ApplicationDataCreateDisposition.Always).Values;
 
             var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings.Values;
             if (!(localSettings[guidSettingsKey] is Guid))
@@ -27,7 +29,10 @@ namespace Discouser.ViewModel
             }
             LocalGuid = (Guid)localSettings[guidSettingsKey];
 
-            Sites = new ObservableCollection<Site>(logins.Select(l => new Site(new DataContext(l.Item1, l.Item2, (Guid)LocalGuid))));
+            Sites = new ObservableCollection<Site>(Logins
+                .Where(item => item.Key.Contains('@'))
+                .Select(item => DecodeLogin(item.Key))
+                .Select(login => new Site(new DataContext(login.Item1, login.Item2, LocalGuid))));
 
             NewSiteCommand = new Command(CanAddNewSite, AddNewSite);
         }
@@ -40,32 +45,62 @@ namespace Discouser.ViewModel
                 && !string.IsNullOrEmpty(NewSitePassword);
         }
 
-        private void AddNewSite()
+        private async Task AddNewSite()
         {
-            AddSite(Tuple.Create(NewSiteUrl, NewSiteUsername));
-            NewSiteUrl = "";
-            NewSiteUsername = "";
-            NewSitePassword = "";
-        }
+            var url = NewSiteUrl;
+            var username = NewSiteUsername;
+            var password = NewSitePassword;
 
-        private void AddSite(Tuple<string, string> login)
-        {
-            if (!logins.Contains(login))
+            NewSiteFailedToAuthorize = false;
+            NewSiteLoading = true;
+            var siteToAdd = new Site(new DataContext(url, username, LocalGuid));
+
+            var loggedInUser = await siteToAdd.Context.Authorize(username, password);
+            NewSiteLoading = false;
+            if (loggedInUser == username)
             {
-                logins.Add(login);
-                Sites.Add(new Site(new DataContext(login.Item1, login.Item2, LocalGuid)));
-                Windows.Storage.ApplicationData.Current.RoamingSettings.Values[loginSettingsKey] = logins;
+                NewSiteFailedToAuthorize = true;
+            }
+            else
+            {
+                AddSite(siteToAdd);
+                url = "";
+                username = "";
+                password = "";
             }
         }
+
+        private void AddSite(Site siteToAdd)
+        {
+            var login = EncodeLogin(siteToAdd.Username, siteToAdd.Url);
+            if (!Logins.ContainsKey(login))
+            {
+                Logins.Add(login, null);
+            }
+
+            Sites.Remove(siteToAdd);
+            Sites.Add(siteToAdd);
+        }
+
+        private string EncodeLogin(string username, string url)
+        {
+            return username + "@" + url;
+        }
+
+        private Tuple<string, string> DecodeLogin(string login)
+        {
+            var split = login.Split('@');
+            return Tuple.Create(split[0], split[1]);
+        }
+
 
         /// <summary>
         /// Removes a site from the list of sites, and disposes its data context.
         /// </summary>
-        /// <param name="siteToRemove"></param>
         public void RemoveSite(Site siteToRemove)
         {
             Sites.Remove(siteToRemove);
-            logins.RemoveAll(login => login.Item1 == siteToRemove.Url && login.Item2 == siteToRemove.Username);
+            Logins.Remove(EncodeLogin(siteToRemove.Username, siteToRemove.Url));
             siteToRemove.Context.Dispose();
         }
 
@@ -77,13 +112,22 @@ namespace Discouser.ViewModel
             }
         }
 
+        public override void NotifyChanges(Model.Site model)
+        {
+            throw new NotImplementedException();
+        }
+
         public Command NewSiteCommand { get; private set; }
+
         private string _newSiteUsername;
-        public string NewSiteUsername { get { return _newSiteUsername; }
+        public string NewSiteUsername
+        {
+            get { return _newSiteUsername; }
             set
             {
-                NewSiteCommand.Notify();
                 _newSiteUsername = value;
+                NewSiteCommand.Notify();
+                RaisePropertyChanged("NewSiteUsername");
             }
         }
         private string _newSitePassword;
@@ -92,8 +136,9 @@ namespace Discouser.ViewModel
             get { return _newSitePassword; }
             set
             {
-                NewSiteCommand.Notify();
                 _newSitePassword = value;
+                NewSiteCommand.Notify();
+                RaisePropertyChanged("NewSitePassword");
             }
         }
         private string _newSiteUrl;
@@ -102,8 +147,32 @@ namespace Discouser.ViewModel
             get { return _newSiteUrl; }
             set
             {
-                NewSiteCommand.Notify();
                 _newSiteUrl = value;
+                NewSiteCommand.Notify();
+                RaisePropertyChanged("NewSiteUrl");
+            }
+        }
+
+        private bool _newSiteFailedToAuthorize;
+        public bool NewSiteFailedToAuthorize
+        {
+            get { return _newSiteFailedToAuthorize; }
+            set
+            {
+                _newSiteFailedToAuthorize = value;
+                RaisePropertyChanged("NewSiteFailedToAuthorize");
+            }
+        }
+
+
+        private bool _newSiteLoading;
+        public bool NewSiteLoading
+        {
+            get { return _newSiteLoading; }
+            set
+            {
+                _newSiteLoading = value;
+                RaisePropertyChanged("NewSiteLoading");
             }
         }
     }

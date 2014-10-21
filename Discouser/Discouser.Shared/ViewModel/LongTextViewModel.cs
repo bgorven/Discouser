@@ -22,7 +22,7 @@ namespace Discouser.ViewModel
                     var raw = _model;
                     while (raw.Next.HasValue)
                     {
-                        raw = _context.Db.Get<Model.LongText>(raw.Next.Value);
+                        raw = _context.PersistentDbConnection.Get<Model.LongText>(raw.Next.Value);
                         text += raw.Text;
                     }
                     _text = text;
