@@ -35,12 +35,12 @@ namespace Discouser.Api
         {
             try
             {
-                var result = await _client.SendRequestAsync(BuildRequest(path, method, parameters));
+                var result = await _client.SendRequestAsync(BuildRequest(_host, path, method, parameters));
 
                 if (!result.IsSuccessStatusCode && (await result.Content.ReadAsStringAsync()) == "['BAD CSRF']")
                 {
                     _client.DefaultRequestHeaders.Append("X-CSRF-Token", await GetCsrfToken());
-                    result = await _client.SendRequestAsync(BuildRequest(path, method, parameters));
+                    result = await _client.SendRequestAsync(BuildRequest(_host, path, method, parameters));
                 }
                 if (!result.IsSuccessStatusCode)
                 {
@@ -59,7 +59,7 @@ namespace Discouser.Api
 
         private async Task<string> GetCsrfToken()
         {
-            var uriString = _host + ((_host.Last() == '/') ? "session/csrf.json" : "/session/csrf.json");
+            var uriString = _host + "/session/csrf.json";
             var csrfSource = new Uri(uriString);
             var csrfResult = _client.GetAsync(csrfSource);
             var csrfToken = (await Deserialize(await csrfResult))["csrf"].ToString();
@@ -85,7 +85,7 @@ namespace Discouser.Api
             }
         }
 
-        private static HttpRequestMessage BuildRequest(string path, HttpMethod method, IEnumerable<KeyValuePair<string, string>> parameters)
+        private static HttpRequestMessage BuildRequest(string host, string path, HttpMethod method, IEnumerable<KeyValuePair<string, string>> parameters)
         {
             var query = "";
             path = (path.StartsWith("/") ? "" : "/") + path + (path.EndsWith("/") ? "" : "/");
@@ -103,10 +103,16 @@ namespace Discouser.Api
                 }
             }
 
-            path = path.Substring(0, path.Length - 1) + ".json";
-            query = query.Substring(0, query.Length - 1);
+            if (!string.IsNullOrEmpty(path))
+            {
+                path = path.Substring(0, path.Length - 1) + ".json";
+            }
+            if (!string.IsNullOrEmpty(query))
+            {
+                query = query.Substring(0, query.Length - 1);
+            }
 
-            var uri = new Uri(path + "?" + query);
+            var uri = new Uri(host + path + "?" + query);
 
             var request = new HttpRequestMessage(method, uri);
             if (method == HttpMethod.Put || method == HttpMethod.Post || method == HttpMethod.Patch)

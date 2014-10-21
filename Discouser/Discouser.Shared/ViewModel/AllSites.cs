@@ -59,14 +59,14 @@ namespace Discouser.ViewModel
             NewSiteLoading = false;
             if (loggedInUser == username)
             {
-                NewSiteFailedToAuthorize = true;
-            }
-            else
-            {
                 AddSite(siteToAdd);
                 url = "";
                 username = "";
                 password = "";
+            }
+            else
+            {
+                NewSiteFailedToAuthorize = true;
             }
         }
 

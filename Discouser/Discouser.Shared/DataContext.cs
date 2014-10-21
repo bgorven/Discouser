@@ -42,34 +42,23 @@ namespace Discouser
         /// Attempts to login with the login username and password if supplied, or the authorization
         /// token stored in the HttpClient's cookies.
         /// </summary>
-        /// <param name="username">The user name to log in with. If not null, sets the username property this DataContext
-        /// will use for local db connections. If null, the contents of the username property will be used. If the property
+        /// <param name="username">The user name to log in with. If null, the contents of the Username property will be used. If the property
         /// is also null, the site will be queried and the name of the currently logged in session will be returned.
         /// </param>
         /// <param name="password">If username and password are not null, will log in using the supplied credentials.</param>
         /// <returns>The name of the logged in session, or null if no session is active.</returns>
         internal async Task<string> Authorize(string username = null, string password = null)
         {
-            if (username != null)
-            {
-                Username = username;
-            }
+            var login = username ?? Username;
 
-            if (Username != null && password != null)
+            if (login != null && password != null)
             {
-                await Api.PostSession(login: Username, password: password);
+                await Api.PostSession(login: login, password: password);
             }
 
             var session = await Api.GetSessionCurrent();
 
-            if (session != null && session.Username == Username)
-            {
-                return Username;
-            }
-            else
-            {
-                return null;
-            }
+            return (session ?? new Session()).Username;
         }
 
         internal async Task Initialize()

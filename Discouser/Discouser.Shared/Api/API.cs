@@ -18,7 +18,9 @@ namespace Discouser.Api
 
         public ApiConnection(string path, Guid guid)
         {
-            _host = path.EndsWith("/") ? path.Substring(0, path.Length - 1) : path;
+            path = path.EndsWith("/") ? path.Substring(0, path.Length - 1) : path;
+            path = path.StartsWith("http") ? path : "http://" + path;
+            _host = path;
             _guid = guid;
 
             _client.DefaultRequestHeaders.UserAgent.ParseAdd("Buddy");
@@ -39,7 +41,7 @@ namespace Discouser.Api
         {
             var result = await Get("session/current");
             if (result == null) return null;
-            return new Session() { Username = (string)result["username"] };
+            return new Session() { Username = (string)result["current_user"]["username"] };
         }
 
         internal async Task<IEnumerable<Category>> GetCategories()
