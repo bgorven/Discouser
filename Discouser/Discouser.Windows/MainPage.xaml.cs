@@ -28,5 +28,19 @@ namespace Discouser
             InitializeComponent();
             DataContext = new AllSites();
         }
+
+        private void FocusNewSiteUrl(object sender, RoutedEventArgs e)
+        {
+            NewSiteUrl.Focus(FocusState.Programmatic);
+        }
+
+        private void ActivateNewSiteAddButton(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+            {
+                NewSiteAddButton.Command.Execute(null);
+                NewSiteCancelAddButton.Focus(FocusState.Programmatic);
+            }
+        }
     }
 }

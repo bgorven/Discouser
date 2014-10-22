@@ -32,65 +32,71 @@ namespace Discouser.ViewModel
             Sites = new ObservableCollection<Site>(Logins
                 .Where(item => item.Key.Contains('@'))
                 .Select(item => DecodeLogin(item.Key))
-                .Select(login => new Site(new DataContext(login.Item1, login.Item2, LocalGuid))));
+                .Select(login => new Site(new DataContext(username: login.Item1, url: login.Item2, guid: LocalGuid))));
 
             NewSiteCommand = new Command(CanAddNewSite, AddNewSite);
+            NewSiteCancelAddCommand = new Command(CancelAddNewSite);
         }
 
         private bool CanAddNewSite()
         {
             return !string.IsNullOrEmpty(NewSiteUrl)
-                && Uri.IsWellFormedUriString(NewSiteUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? NewSiteUrl : "http://" + NewSiteUrl, UriKind.Absolute)
+                && Uri.IsWellFormedUriString(NewSiteUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? NewSiteUrl : "https://" + NewSiteUrl, UriKind.Absolute)
                 && !string.IsNullOrEmpty(NewSiteUsername)
                 && !string.IsNullOrEmpty(NewSitePassword);
         }
 
+        private async Task CancelAddNewSite()
+        {
+            await Task.FromResult(NewSiteLoading = false);
+        }
+
         private async Task AddNewSite()
         {
-            var url = NewSiteUrl;
-            var username = NewSiteUsername;
-            var password = NewSitePassword;
-
             NewSiteFailedToAuthorize = false;
             NewSiteLoading = true;
-            var siteToAdd = new Site(new DataContext(url, username, LocalGuid));
 
-            var loggedInUser = await siteToAdd.Context.Authorize(username, password);
-            NewSiteLoading = false;
-            if (loggedInUser == username)
+            try {
+                var url = NewSiteUrl;
+                var username = NewSiteUsername;
+                var password = NewSitePassword;
+                var siteToAdd = new Site(new DataContext(url, username, LocalGuid));
+
+                if (!NewSiteLoading) return;
+                var loggedInUser = await siteToAdd.Context.Authorize(username, password);
+
+
+                if (!NewSiteLoading) return;
+                NewSiteLoading = false;
+                if (loggedInUser == username)
+                {
+                    AddSite(siteToAdd);
+                    NewSiteUrl = "";
+                    NewSiteUsername = "";
+                    NewSitePassword = "";
+                    NewSiteViewVisible = false;
+                }
+                else
+                {
+                    NewSiteFailedToAuthorize = true;
+                }
+            } catch (Exception é)
             {
-                AddSite(siteToAdd);
-                url = "";
-                username = "";
-                password = "";
-            }
-            else
-            {
+                é.Message.ToList();
                 NewSiteFailedToAuthorize = true;
             }
         }
 
         private void AddSite(Site siteToAdd)
         {
-            var login = EncodeLogin(siteToAdd.Username, siteToAdd.Url);
-            if (!Logins.ContainsKey(login))
+            foreach (var siteToRemove in Sites
+                .Where(site => site.Url == siteToAdd.Url && site.Username == siteToAdd.Username)
+                .ToList())
             {
-                Logins.Add(login, null);
+                RemoveSite(siteToRemove);
             }
-
-            Sites.Remove(siteToAdd);
+            Logins.Add(EncodeLogin(siteToAdd.Username, siteToAdd.Url), "");
             Sites.Add(siteToAdd);
-        }
-
-        private string EncodeLogin(string username, string url)
-        {
-            return username + "@" + url;
-        }
-
-        private Tuple<string, string> DecodeLogin(string login)
-        {
-            var split = login.Split('@');
-            return Tuple.Create(split[0], split[1]);
         }
 
 
@@ -102,6 +108,20 @@ namespace Discouser.ViewModel
             Sites.Remove(siteToRemove);
             Logins.Remove(EncodeLogin(siteToRemove.Username, siteToRemove.Url));
             siteToRemove.Context.Dispose();
+        }
+
+        private string EncodeLogin(string username, string url)
+        {
+            return username + "@" + url;
+        }
+
+        /// <summary>
+        /// Username in item1, Url in item2
+        /// </summary>
+        private Tuple<string, string> DecodeLogin(string login)
+        {
+            var split = login.Split('@');
+            return Tuple.Create(split[0], split[1]);
         }
 
         public void Dispose()
@@ -118,8 +138,9 @@ namespace Discouser.ViewModel
         }
 
         public Command NewSiteCommand { get; private set; }
+        public Command NewSiteCancelAddCommand { get; private set; }
 
-        private string _newSiteUsername;
+        private volatile string _newSiteUsername;
         public string NewSiteUsername
         {
             get { return _newSiteUsername; }
@@ -130,7 +151,7 @@ namespace Discouser.ViewModel
                 RaisePropertyChanged("NewSiteUsername");
             }
         }
-        private string _newSitePassword;
+        private volatile string _newSitePassword;
         public string NewSitePassword
         {
             get { return _newSitePassword; }
@@ -141,7 +162,7 @@ namespace Discouser.ViewModel
                 RaisePropertyChanged("NewSitePassword");
             }
         }
-        private string _newSiteUrl;
+        private volatile string _newSiteUrl;
         public string NewSiteUrl
         {
             get { return _newSiteUrl; }
@@ -153,7 +174,7 @@ namespace Discouser.ViewModel
             }
         }
 
-        private bool _newSiteFailedToAuthorize;
+        private volatile bool _newSiteFailedToAuthorize;
         public bool NewSiteFailedToAuthorize
         {
             get { return _newSiteFailedToAuthorize; }
@@ -165,7 +186,7 @@ namespace Discouser.ViewModel
         }
 
 
-        private bool _newSiteLoading;
+        private volatile bool _newSiteLoading;
         public bool NewSiteLoading
         {
             get { return _newSiteLoading; }
@@ -173,6 +194,17 @@ namespace Discouser.ViewModel
             {
                 _newSiteLoading = value;
                 RaisePropertyChanged("NewSiteLoading");
+            }
+        }
+
+        private volatile bool _newSiteViewVisible;
+        public bool NewSiteViewVisible
+        {
+            get { return _newSiteViewVisible; }
+            set
+            {
+                _newSiteViewVisible = value;
+                RaisePropertyChanged("NewSiteViewVisible");
             }
         }
     }

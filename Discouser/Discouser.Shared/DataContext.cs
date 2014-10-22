@@ -15,7 +15,6 @@ namespace Discouser
         internal ApiConnection Api { get; private set; }
         internal SQLiteConnection PersistentDbConnection { get; private set; }
         internal SQLiteConnection NewDbConnection() {  return new SQLiteConnection(_dbString); }
-        internal SQLiteAsyncConnection NewAsyncDbConnection() {  return new SQLiteAsyncConnection(_dbString); }
         internal Guid LocalGuid { get; private set; }
         internal TimeSpan PollDelay { get; set; }
         internal string FolderName { get; private set; }
@@ -26,11 +25,11 @@ namespace Discouser
         public string SiteName { get; private set; }
         public StorageFolder StorageDir { get; private set; }
 
-        public DataContext(string url, string username, Guid localGuid)
+        public DataContext(string url, string username, Guid guid)
         {
             SiteUrl = url;
             Username = username;
-            LocalGuid = localGuid;
+            LocalGuid = guid;
             Api = new ApiConnection(url, LocalGuid);
             FolderName = SiteUrl.Replace("http:", "").Replace("https:", "").Replace("/", "");
         }
@@ -68,29 +67,30 @@ namespace Discouser
 
             PersistentDbConnection = NewDbConnection();
 
-            var db = NewAsyncDbConnection();
-
-            await Task.WhenAll(new Task[] {
-                db.CreateTableAsync<Category>(),
-                db.CreateTableAsync<LongText>(),
-                db.CreateTableAsync<UserInfo>(),
-                db.CreateTableAsync<Topic>(),
-                db.CreateTableAsync<Reply>(),
-                db.CreateTableAsync<Like>(),
-                db.CreateTableAsync<Post>(),
-                db.CreateTableAsync<User>(),
-                db.CreateTableAsync<Site>(),
-            });
+            using (var db = NewDbConnection())
+            {
+                db.CreateTable<Category>();
+                db.CreateTable<LongText>();
+                db.CreateTable<UserInfo>();
+                db.CreateTable<Topic>();
+                db.CreateTable<Reply>();
+                db.CreateTable<Like>();
+                db.CreateTable<Post>();
+                db.CreateTable<User>();
+                db.CreateTable<Site>();
+            }
         }
 
         public async Task<ICollection<Category>> AllCategories()
         {
             var categories = await Api.GetCategories();
 
-            var db = NewDbConnection();
-            db.InsertAll(categories, "OR REPLACE");
+            using (var db = NewDbConnection())
+            {
+                db.InsertAll(categories, "OR REPLACE");
 
-            return db.Table<Category>().ToList();
+                return db.Table<Category>().ToList();
+            }
         }
 
         private volatile ViewModel.Topic _topicToWatch = null;
@@ -163,43 +163,58 @@ namespace Discouser
 
         private void LatestTopicMessage(int topicId, int messageId)
         {
-            var db = NewDbConnection();
-            var topic = db.Get<Topic>(topicId);
-            if (topic != null)
+            using (var db = NewDbConnection())
             {
-                topic.LatestMessage = messageId;
-                db.Update(topic);
+                var topic = db.Get<Topic>(topicId);
+                if (topic != null)
+                {
+                    topic.LatestMessage = messageId;
+                    db.Update(topic);
+                }
             }
         }
 
         private void DeletePost(int postId)
         {
-            var db = NewDbConnection();
-            var post = db.Get<Post>(postId);
-            if (post != null)
+            using (var db = NewDbConnection())
             {
-                post.Deleted = true;
-                db.Update(post);
+                var post = db.Get<Post>(postId);
+                if (post != null)
+                {
+                    post.Deleted = true;
+                    db.Update(post);
+                }
             }
         }
 
         private async Task DownloadLikes(int id)
         {
-            var db = NewDbConnection();
-            db.InsertAll(await Api.GetLikes(id: id), "OR REPLACE");
+            using (var db = NewDbConnection())
+            {
+                db.InsertAll(await Api.GetLikes(id: id), "OR REPLACE");
+            }
         }
 
         private async Task DownloadPost(int id)
         {
-            var db = NewDbConnection();
-            db.InsertOrReplace(await Api.GetPost(id));
+            using (var db = NewDbConnection())
+            {
+                db.InsertOrReplace(await Api.GetPost(id));
+            }
         }
 
         public void Dispose()
         {
-            var db = NewDbConnection();
-            db.Dispose();
-            Api.Dispose();
+            if (PersistentDbConnection != null)
+            {
+                PersistentDbConnection.Dispose();
+                PersistentDbConnection = null;
+            }
+            if (Api != null)
+            {
+                Api.Dispose();
+                Api = null;
+            }
         }
     }
 }

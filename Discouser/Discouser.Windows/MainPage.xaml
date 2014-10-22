@@ -10,18 +10,24 @@
     <Page.Resources>
         <DataTemplate x:Key="SiteAppbarItemTemplate">
         </DataTemplate>
-        
+
+        <local:InverseBooleanConverter x:Key="BooleanInverter" />
         <local:BooleanToVisibilityConverter x:Key="VisiblityConverter" />
+        <local:InverseBooleanToVisibilityConverter x:Key="InverseVisiblityConverter" />
     </Page.Resources>
     <Page.TopAppBar>
-        <AppBar>
-            <Grid HorizontalAlignment="Stretch" Height="76">
+        <AppBar IsOpen="True">
+            <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="66"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="76" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <!-- ItemTemplate="{StaticResource SiteAppbarItemTemplate}" -->
-                <ListView ItemsSource="{Binding Sites}"  Grid.Column="0"
+                <ListView ItemsSource="{Binding Sites}"  Grid.Column="0" Grid.Row="0"
 					ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
 					ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Left"  >
                     <ListView.ItemsPanel>
@@ -37,12 +43,6 @@
                                     <ImageBrush ImageSource="{Binding Logo}"/>
                                 </Canvas.Background>
                                 <StackPanel Width="244">
-                                    <StackPanel.Background>
-                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                            <GradientStop Color="#FF646464" Offset="0"/>
-                                            <GradientStop Color="Transparent" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </StackPanel.Background>
                                     <TextBlock Text="{Binding Username}" />
                                     <TextBlock Text="{Binding SiteName}" />
                                 </StackPanel>
@@ -50,31 +50,46 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <Button x:Name="NewSiteButton" 
-				HorizontalAlignment="Left" VerticalAlignment="Stretch"  Grid.Column="1" Margin="0,0,0,-2">
-                    <Button.Flyout>
-                        <Flyout>
-                            <StackPanel Width="256">
-                                <TextBox x:Name="NewSiteUrl" TextWrapping="Wrap" PlaceholderText="meta.discourse.org" InputScope="Url" Text="{Binding NewSiteUrl, Mode=TwoWay}"/>
-                                <TextBox x:Name="NewSiteUsername" TextWrapping="Wrap" Margin="0,5,0,5" Text="{Binding NewSiteUsername, Mode=TwoWay}">
-                                </TextBox>
-                                <PasswordBox x:Name="NewSitePassword" PlaceholderText="●●●●●●●" Password="{Binding NewSitePassword, Mode=TwoWay}"/>
-                                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Canvas Background="Red" Width="25" Height="25" Visibility="{Binding NewSiteFailedToAuthorize, Converter={StaticResource VisiblityConverter}}">
-                                        <TextBlock Width="25" Height="25" TextAlignment="Center" FontSize="22" FontWeight="Bold" Foreground="White">
-                                        !
-                                        </TextBlock>
-                                    </Canvas>
-                                    <ProgressRing Width="25" Height="25" Margin="0,0,3,0" IsActive="{Binding NewSiteLoading}" Visibility="{Binding NewSiteLoading, Converter={StaticResource VisiblityConverter}}" />
-                                    <Button x:Name="NewSiteAddButton" Command="{Binding NewSiteCommand}">
-                                        <Image Height="19" Source="Images/next.png" Stretch="Fill" Width="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Button>
-                                </StackPanel>
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                    <Image Height="76" Source="Images/add.png" Stretch="Fill" Width="76" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Button>
+                <AppBarToggleButton x:Name="NewSiteButton" Grid.Column="1" Grid.Row="0" Checked="FocusNewSiteUrl" IsChecked="{Binding NewSiteViewVisible, Mode=TwoWay}">
+                    <AppBarToggleButton.Content>
+                        <Image Source="Images/Add.png" />
+                    </AppBarToggleButton.Content>
+                </AppBarToggleButton>
+                <Border Grid.Row="1" Grid.ColumnSpan="2" BorderThickness="2">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#FF080808" Offset="0"/>
+                            <GradientStop Color="#FF404040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                </Border>
+                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Height="45" VerticalAlignment="Center"
+                            Visibility="{Binding NewSiteViewVisible, Converter={StaticResource VisiblityConverter}}"
+                            KeyUp="ActivateNewSiteAddButton">
+                    <TextBox x:Name="NewSiteUrl" Width="244" Margin="6"
+                             PlaceholderText="meta.discourse.org" InputScope="Url" Text="{Binding NewSiteUrl, Mode=TwoWay}" />
+                    <TextBox x:Name="NewSiteUsername" Width="244" Margin="6" 
+                             PlaceholderText="codinghorror" Text="{Binding NewSiteUsername, Mode=TwoWay}" />
+                    <PasswordBox x:Name="NewSitePassword" Width="244" Margin="6" 
+                                 PlaceholderText="●●●●●●●" Password="{Binding NewSitePassword, Mode=TwoWay}" />
+                    <Canvas Background="Red" Width="33" Height="33" Margin="6" Visibility="{Binding NewSiteFailedToAuthorize, Converter={StaticResource VisiblityConverter}}">
+                        <TextBlock Width="33" Height="33" TextAlignment="Center" FontSize="30" FontWeight="Bold" Foreground="White">
+                            !
+                        </TextBlock>
+                    </Canvas>
+                </StackPanel>
+                <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding NewSiteViewVisible, Converter={StaticResource VisiblityConverter}}">
+                    <AppBarButton x:Name="NewSiteAddButton" Command="{Binding NewSiteCommand}"
+                                  IsCompact="True" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                  Visibility="{Binding NewSiteLoading, Converter={StaticResource InverseVisiblityConverter}}">
+                        <Image Source="Images/next.png" />
+                    </AppBarButton>
+                    <AppBarButton x:Name="NewSiteCancelAddButton" Command="{Binding NewSiteCancelAddCommand}"
+                                  IsCompact="True" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                  Visibility="{Binding NewSiteLoading, Converter={StaticResource VisiblityConverter}}">
+                        <Image Source="Images/cancel.png" />
+                    </AppBarButton>
+                </Grid>
             </Grid>
         </AppBar>
     </Page.TopAppBar>

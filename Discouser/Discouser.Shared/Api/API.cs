@@ -19,7 +19,7 @@ namespace Discouser.Api
         public ApiConnection(string path, Guid guid)
         {
             path = path.EndsWith("/") ? path.Substring(0, path.Length - 1) : path;
-            path = path.StartsWith("http") ? path : "http://" + path;
+            path = path.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? path : "https://" + path;
             _host = path;
             _guid = guid;
 
