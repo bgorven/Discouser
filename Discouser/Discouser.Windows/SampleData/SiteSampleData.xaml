@@ -1,0 +1,111 @@
+﻿<ViewModel:Site xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser" xmlns:Storage="using:Windows.Storage" xmlns:System="using:System" xmlns:FileProperties="using:Windows.Storage.FileProperties" Logo="Ultricies sociis sit vestibulum taciti" SiteName="Nunc dictumst vestibulum fames" Url="http://www.adatum.com/" Username="Tristique pretium bibendum">
+	<ViewModel:Site.Context>
+		<Discouser:DataContext SiteName="Iaculis lacinia hendrerit" Username="Erat habitasse volutpat eros nibh">
+			<Discouser:DataContext.StorageDir>
+				<Storage:StorageFolder Attributes="ReadOnly" DisplayType="Penatibus dolor primis porttitor" DisplayName="Ornare platea laoreet nec" FolderRelativeId="Non adipiscing praesent rutrum" Name="Himenaeos vestibulum imperdiet montes vestibulum" Path="Malesuada maecenas nostra augue">
+					<Storage:StorageFolder.DateCreated>
+						<System:DateTimeOffset/>
+					</Storage:StorageFolder.DateCreated>
+					<Storage:StorageFolder.Provider>
+						<Storage:StorageProvider DisplayName="Nisi per sapien nisl natoque" Id="Posuere sed semper parturient potenti"/>
+					</Storage:StorageFolder.Provider>
+					<Storage:StorageFolder.Properties>
+						<FileProperties:StorageItemContentProperties/>
+					</Storage:StorageFolder.Properties>
+				</Storage:StorageFolder>
+			</Discouser:DataContext.StorageDir>
+		</Discouser:DataContext>
+	</ViewModel:Site.Context>
+	<ViewModel:Site.Categories>
+		<ViewModel:Category Color="#FF8DD3C7" Description="Vestibulum donec duis" Name="Phasellus nam integer consequat vestibulum" TextColor="Adipiscing cras parturient">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="75" LatestMessage="42" Name="Nunc maecenas aenean adipiscing"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="86" LatestMessage="23" Name="Quisque convallis mauris vivamus etiam"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="16" LatestMessage="29" Name="Praesent dignissim"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="72" LatestMessage="97" Name="Amet nullam aptent sed fusce"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="61" LatestMessage="39" Name="Elementum dis est accumsan facilisis"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFFFFFB3" Description="Aliquet habitasse hendrerit himenaeos facilisi" Name="Dictumst eleifend morbi parturient aliquam" TextColor="Fringilla bibendum ante lorem">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="23" LatestMessage="14" Name="Hac faucibus leo vestibulum nulla"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="20" LatestMessage="81" Name="Mus vestibulum arcu"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="43" LatestMessage="89" Name="Adipiscing congue"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="11" LatestMessage="49" Name="Cursus parturient"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="21" LatestMessage="21" Name="Diam nec vestibulum vestibulum"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFBEBADA" Description="Dolor commodo lobortis conubia elit" Name="Inceptos imperdiet adipiscing interdum" TextColor="Eget blandit augue lectus libero">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="34" LatestMessage="45" Name="Nascetur pharetra ligula"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="74" LatestMessage="12" Name="Parturient malesuada litora penatibus"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="34" LatestMessage="27" Name="Cubilia dapibus placerat"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="26" LatestMessage="10" Name="Pulvinar vestibulum porttitor luctus"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="75" LatestMessage="41" Name="Fames vestibulum egestas adipiscing magnis"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFFB8072" Description="Eros nibh" Name="Euismod erat mauris" TextColor="Non tincidunt enim">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="43" LatestMessage="67" Name="Parturient mollis tristique"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="78" LatestMessage="82" Name="Ultricies senectus feugiat montes gravida"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="62" LatestMessage="35" Name="Vestibulum venenatis"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="52" LatestMessage="10" Name="Vestibulum iaculis"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="79" LatestMessage="20" Name="Lacinia adipiscing laoreet sociosqu"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFFDB462" Description="Ipsum ultrices vestibulum vehicula justo" Name="Pretium vestibulum nisl" TextColor="Suscipit torquent felis nisi potenti">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="12" LatestMessage="45" Name="Volutpat lacus adipiscing per"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="66" LatestMessage="62" Name="Sed curabitur"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="46" LatestMessage="59" Name="Parturient ornare maecenas"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="53" LatestMessage="41" Name="Sem platea phasellus sit"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="66" LatestMessage="51" Name="Vel nunc primis nam"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFB3DE69" Description="Sodales pede vestibulum vestibulum" Name="Orci dis semper sociis" TextColor="Rutrum odio praesent sapien accumsan">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="69" LatestMessage="40" Name="Magna massa quam consequat taciti"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="43" LatestMessage="14" Name="Adipiscing viverra bibendum metus est"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="69" LatestMessage="39" Name="Aliquam convallis morbi tellus integer"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="67" LatestMessage="84" Name="Dictumst eleifend neque tempor"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="88" LatestMessage="88" Name="Parturient quis"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFFCCDE5" Description="Aliquam adipiscing facilisis" Name="Elementum turpis hac leo vestibulum" TextColor="Tortor dignissim">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="13" LatestMessage="72" Name="Fermentum mus"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="31" LatestMessage="30" Name="Facilisi aliquet netus varius fringilla"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="95" LatestMessage="56" Name="Nec urna"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="36" LatestMessage="37" Name="Cras faucibus nulla habitasse aenean"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="28" LatestMessage="18" Name="Hendrerit habitant duis"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFD9D9D9" Description="Porta purus" Name="Per penatibus" TextColor="Mauris malesuada blandit nullam parturient">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="46" LatestMessage="10" Name="Vestibulum commodo risus aptent inceptos"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="69" LatestMessage="11" Name="Porttitor interdum sed lobortis sem"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="18" LatestMessage="88" Name="Auctor velit tincidunt vitae"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="78" LatestMessage="22" Name="Congue nascetur nunc"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="66" LatestMessage="75" Name="Sit class conubia"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFBC80BD" Description="Pharetra donec placerat" Name="Vestibulum lectus ante" TextColor="Amet cursus vel dictum">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="74" LatestMessage="85" Name="Cubilia pulvinar arcu"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="44" LatestMessage="34" Name="Sagittis libero adipiscing nam"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="72" LatestMessage="12" Name="Senectus diam sociosqu dapibus suscipit"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="34" LatestMessage="73" Name="Egestas ligula euismod litora eget"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="22" LatestMessage="33" Name="Ultricies venenatis sed luctus"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+		<ViewModel:Category Color="#FFCCEBC5" Description="Consequat convallis dignissim leo" Name="Curabitur lorem phasellus hac" TextColor="Magnis vulputate etiam fusce">
+			<ViewModel:Category.Topics>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="67" LatestMessage="68" Name="Mus elementum"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="22" LatestMessage="91" Name="Morbi nulla parturient ultrices"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="16" LatestMessage="39" Name="Mattis feugiat proin mauris"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="23" LatestMessage="46" Name="Facilisis vehicula fermentum"/>
+				<ViewModel:Topic Activity="10/23/2014 01:12:53" Id="66" LatestMessage="90" Name="Gravida elit mollis fringilla enim"/>
+			</ViewModel:Category.Topics>
+		</ViewModel:Category>
+	</ViewModel:Site.Categories>
+</ViewModel:Site>

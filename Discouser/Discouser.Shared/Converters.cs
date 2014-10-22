@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
+using System.Linq;
 
 namespace Discouser
 {

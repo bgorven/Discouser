@@ -1,54 +1,170 @@
-﻿<ViewModel:AllSites xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser">
+﻿<ViewModel:AllSites xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser" xmlns:Storage="using:Windows.Storage" NewSitePassword="Blandit ante" NewSiteLoading="False" NewSiteUrl="Congue cursus inceptos curabitur arcu" NewSiteUsername="Amet nam aliquet" NewSiteFailedToAuthorize="True" NewSiteViewVisible="True">
+	<ViewModel:AllSites.NewSiteCancelAddCommand>
+		<Discouser:Command/>
+	</ViewModel:AllSites.NewSiteCancelAddCommand>
+	<ViewModel:AllSites.NewSiteCommand>
+		<Discouser:Command/>
+	</ViewModel:AllSites.NewSiteCommand>
 	<ViewModel:AllSites.Sites>
-		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Duis phasellus" Url="http://www.adatum.com/" Username="Aliquam cras praesent accumsan etiam">
+		<ViewModel:Site Logo="Conubia nisi nam magna" SiteName="http://www.adatum.com/" Url="http://www.adatum.com/" Username="Vel luctus pulvinar commodo lorem">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Vestibulum class curabitur nam sed"/>
+				<Discouser:DataContext SiteName="Felis aliquet" Username="Sed dolor hendrerit fames">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="Normal" DisplayType="Malesuada sit" DisplayName="Himenaeos ipsum vestibulum vestibulum imperdiet" FolderRelativeId="Penatibus justo libero adipiscing" Name="Parturient eros lectus" Path="Pharetra sem placerat blandit nibh"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FF8DD3C7" Description="Maecenas sed donec" Name="Nam" TextColor="#FF8DD3C7"/>
+				<ViewModel:Category Color="#FFFFFFB3" Description="Mauris praesent dignissim parturient" Name="Cras" TextColor="#FFFFFFB3"/>
+				<ViewModel:Category Color="#FFBEBADA" Description="Est fermentum" Name="Sed" TextColor="#FFBEBADA"/>
+				<ViewModel:Category Color="#FFFB8072" Description="Facilisi vivamus" Name="Aenean" TextColor="#FFFB8072"/>
+				<ViewModel:Category Color="#FFFDB462" Description="Interdum lobortis nascetur dictum habitasse" Name="Mauris" TextColor="#FFFDB462"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-        <ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Adipiscing dictumst ante mauris" Url="http://www.adventure-works.com/" Username="Dis aenean lorem">
+		<ViewModel:Site Logo="Dignissim vestibulum vestibulum elementum" SiteName="http://www.adventure-works.com/" Url="http://www.adventure-works.com/" Username="Sed sem parturient">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Nunc amet"/>
+				<Discouser:DataContext SiteName="Non quis rutrum" Username="Faucibus nec">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="ReadOnly" DisplayType="Cras semper" DisplayName="Inceptos sapien interdum" FolderRelativeId="Duis sociis per nunc" Name="Habitant urna potenti velit" Path="Vitae pretium"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFB3DE69" Description="Suscipit nunc vestibulum" Name="Nullam" TextColor="#FFB3DE69"/>
+				<ViewModel:Category Color="#FFFCCDE5" Description="Neque egestas" Name="Dis" TextColor="#FFFCCDE5"/>
+				<ViewModel:Category Color="#FFD9D9D9" Description="Volutpat pede maecenas" Name="Aliquam" TextColor="#FFD9D9D9"/>
+				<ViewModel:Category Color="#FFBC80BD" Description="Purus dictumst mus risus" Name="Aptent" TextColor="#FFBC80BD"/>
+				<ViewModel:Category Color="#FFCCEBC5" Description="Convallis primis" Name="Est" TextColor="#FFCCEBC5"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-        <ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Dignissim nulla est proin" Url="http://www.adventure-works.com/" Username="Eget auctor elit convallis">
+		<ViewModel:Site Logo="Justo lectus vulputate parturient" SiteName="http://www.adventure-works.com/" Url="http://www.adventure-works.com/" Username="Adipiscing volutpat maecenas cursus dictum">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Morbi integer arcu nullam"/>
+				<Discouser:DataContext SiteName="Sit odio vel tristique fames" Username="Tincidunt sem">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="Archive" DisplayType="Egestas dis euismod" DisplayName="Felis quam sed dapibus" FolderRelativeId="Aptent vehicula auctor vestibulum ipsum" Name="Orci nam torquent pede" Path="Ultricies venenatis ultrices"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFFFED6F" Description="Parturient vestibulum aliquam fusce arcu" Name="Maecenas" TextColor="#FFFFED6F"/>
+				<ViewModel:Category Color="#FF8DD3C7" Description="Sed elit integer habitasse nulla" Name="Class" TextColor="#FF8DD3C7"/>
+				<ViewModel:Category Color="#FFFFFFB3" Description="Adipiscing hac himenaeos proin" Name="Duis" TextColor="#FFFFFFB3"/>
+				<ViewModel:Category Color="#FFBEBADA" Description="Sociosqu malesuada augue erat penatibus" Name="Integer" TextColor="#FFBEBADA"/>
+				<ViewModel:Category Color="#FFFB8072" Description="Suscipit sed nunc nullam vestibulum" Name="Curae" TextColor="#FFFB8072"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Hac fermentum" Url="http://www.alpineskihouse.com/" Username="Facilisi facilisis parturient vestibulum quisque">
+		<ViewModel:Site Logo="Nec nisi himenaeos integer curae" SiteName="http://www.alpineskihouse.com/" Url="http://www.alpineskihouse.com/" Username="Mus adipiscing class aliquam">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Elementum augue enim"/>
+				<Discouser:DataContext SiteName="Enim platea risus fermentum parturient" Username="Elementum facilisis ornare">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="Directory" DisplayType="Rutrum nibh lobortis vestibulum nascetur" DisplayName="Sodales hac vitae habitasse" FolderRelativeId="Viverra pharetra hendrerit placerat" Name="Velit primis erat dis" Path="Fringilla est eros"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFFDB462" Description="Bibendum magna massa litora" Name="Nunc" TextColor="#FFFDB462"/>
+				<ViewModel:Category Color="#FFB3DE69" Description="Parturient phasellus luctus magnis duis" Name="Amet" TextColor="#FFB3DE69"/>
+				<ViewModel:Category Color="#FFFCCDE5" Description="Vestibulum nulla" Name="Praesent" TextColor="#FFFCCDE5"/>
+				<ViewModel:Category Color="#FFD9D9D9" Description="Convallis inceptos per sed potenti" Name="Hac" TextColor="#FFD9D9D9"/>
+				<ViewModel:Category Color="#FFBC80BD" Description="Nam adipiscing interdum sed" Name="Donec" TextColor="#FFBC80BD"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Lectus habitasse vivamus dolor" Url="http://www.blueyonderairlines.com/" Username="Fringilla leo eros">
+		<ViewModel:Site Logo="Adipiscing massa elit egestas venenatis" SiteName="http://www.blueyonderairlines.com/" Url="http://www.blueyonderairlines.com/" Username="Faucibus per">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Vestibulum erat"/>
+				<Discouser:DataContext SiteName="Hac tincidunt tristique leo vestibulum" Username="Lorem nullam amet">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="Directory" DisplayType="Nec non vestibulum magna" DisplayName="Aptent arcu auctor ultricies" FolderRelativeId="Diam eget eleifend" Name="Dapibus dictumst" Path="Mus ante"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFCCEBC5" Description="Vestibulum per imperdiet" Name="Etiam" TextColor="#FFCCEBC5"/>
+				<ViewModel:Category Color="#FFFFED6F" Description="Sem morbi quis sociosqu" Name="Leo" TextColor="#FFFFED6F"/>
+				<ViewModel:Category Color="#FF8DD3C7" Description="Conubia vel urna parturient torquent" Name="Fusce" TextColor="#FF8DD3C7"/>
+				<ViewModel:Category Color="#FFFFFFB3" Description="Volutpat felis cubilia maecenas sed" Name="Accumsan" TextColor="#FFFFFFB3"/>
+				<ViewModel:Category Color="#FFBEBADA" Description="Justo lacus" Name="Mus" TextColor="#FFBEBADA"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Nisl mus nunc felis ipsum" Url="http://www.cpandl.com/" Username="Aliquet nisi fames">
+		<ViewModel:Site Logo="Maecenas sem nulla" SiteName="http://www.cpandl.com/" Url="http://www.cpandl.com/" Username="Sodales quam vestibulum adipiscing morbi">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Nibh faucibus"/>
+				<Discouser:DataContext SiteName="Mattis etiam" Username="Magnis non habitasse">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="ReadOnly" DisplayType="Himenaeos lorem" DisplayName="Fusce pretium" FolderRelativeId="Mollis parturient rhoncus vestibulum" Name="Odio mauris per orci" Path="Adipiscing hendrerit"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFFB8072" Description="Vestibulum gravida sit morbi" Name="Auctor" TextColor="#FFFB8072"/>
+				<ViewModel:Category Color="#FFFDB462" Description="Phasellus erat senectus" Name="Lorem" TextColor="#FFFDB462"/>
+				<ViewModel:Category Color="#FFB3DE69" Description="Velit lacinia est nibh vitae" Name="Nec" TextColor="#FFB3DE69"/>
+				<ViewModel:Category Color="#FFFCCDE5" Description="Elementum suscipit lectus facilisis fermentum" Name="Congue" TextColor="#FFFCCDE5"/>
+				<ViewModel:Category Color="#FFD9D9D9" Description="Donec nunc vehicula" Name="Bibendum" TextColor="#FFD9D9D9"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Adipiscing odio parturient" Url="http://www.cohovineyard.com/" Username="Justo magnis vestibulum">
+		<ViewModel:Site Logo="Euismod elementum aenean" SiteName="http://www.cohovineyard.com/" Url="http://www.cohovineyard.com/" Username="Dignissim morbi lobortis nisi sed">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Blandit commodo litora conubia"/>
+				<Discouser:DataContext SiteName="Faucibus conubia cubilia" Username="Tempus facilisi tortor">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="LocallyIncomplete" DisplayType="Consequat sit convallis" DisplayName="Sed sem inceptos phasellus interdum" FolderRelativeId="Magna vel nam dapibus" Name="Eros habitant per turpis" Path="Curabitur adipiscing nibh"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFBC80BD" Description="Platea malesuada" Name="Ante" TextColor="#FFBC80BD"/>
+				<ViewModel:Category Color="#FFCCEBC5" Description="Sapien felis" Name="Arcu" TextColor="#FFCCEBC5"/>
+				<ViewModel:Category Color="#FFFFED6F" Description="Hac sociis aliquam leo" Name="Diam" TextColor="#FFFFED6F"/>
+				<ViewModel:Category Color="#FF8DD3C7" Description="Aliquet parturient dictumst" Name="Cursus" TextColor="#FF8DD3C7"/>
+				<ViewModel:Category Color="#FFFFFFB3" Description="Commodo vulputate non erat" Name="Dictumst" TextColor="#FFFFFFB3"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Mollis per" Url="http://www.cohowinery.com/" Username="Mauris nec non">
+		<ViewModel:Site Logo="Mauris vel mollis" SiteName="http://www.cohowinery.com/" Url="http://www.cohowinery.com/" Username="Penatibus vestibulum ultrices">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Lacus mattis orci lorem"/>
+				<Discouser:DataContext SiteName="Fusce suscipit" Username="Donec etiam">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="Directory" DisplayType="Morbi sem pretium rhoncus" DisplayName="Diam lorem" FolderRelativeId="Sodales nulla sit adipiscing proin" Name="Ligula litora sed torquent luctus" Path="Magnis mattis"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFBEBADA" Description="Gravida iaculis fermentum adipiscing parturient" Name="Non" TextColor="#FFBEBADA"/>
+				<ViewModel:Category Color="#FFFB8072" Description="Cras duis pulvinar" Name="Quisque" TextColor="#FFFB8072"/>
+				<ViewModel:Category Color="#FFFDB462" Description="Auctor congue" Name="Per" TextColor="#FFFDB462"/>
+				<ViewModel:Category Color="#FFB3DE69" Description="Ante himenaeos laoreet" Name="Morbi" TextColor="#FFB3DE69"/>
+				<ViewModel:Category Color="#FFFCCDE5" Description="Class potenti libero per curae" Name="Sed" TextColor="#FFFCCDE5"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Hendrerit dapibus" Url="http://www.contoso.com/" Username="Interdum sem massa">
+		<ViewModel:Site Logo="Adipiscing parturient neque tempus" SiteName="http://www.contoso.com/" Url="http://www.contoso.com/" Username="Fermentum vestibulum odio iaculis nam">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Magna montes sed"/>
+				<Discouser:DataContext SiteName="Curabitur vestibulum phasellus nunc per" Username="Nisl non nascetur">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="Archive" DisplayType="Sit dignissim egestas tellus tempor" DisplayName="Vestibulum convallis pharetra" FolderRelativeId="Euismod placerat" Name="Sed adipiscing dapibus" Path="Parturient sem consequat taciti morbi"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFD9D9D9" Description="Adipiscing porttitor" Name="Nulla" TextColor="#FFD9D9D9"/>
+				<ViewModel:Category Color="#FFBC80BD" Description="Justo tristique" Name="Eget" TextColor="#FFBC80BD"/>
+				<ViewModel:Category Color="#FFCCEBC5" Description="Aliquet venenatis hac enim leo" Name="Proin" TextColor="#FFCCEBC5"/>
+				<ViewModel:Category Color="#FFFFED6F" Description="Habitant massa nisi primis" Name="Dictum" TextColor="#FFFFED6F"/>
+				<ViewModel:Category Color="#FF8DD3C7" Description="Cubilia lobortis sociis" Name="Eleifend" TextColor="#FF8DD3C7"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
-		<ViewModel:Site Logo="Images/Discourse Logo.png" SiteName="Sit vel" Url="http://www.consolidatedmessenger.com/" Username="Nascetur ornare feugiat">
+		<ViewModel:Site Logo="Aliquam auctor adipiscing vel" SiteName="http://www.consolidatedmessenger.com/" Url="http://www.consolidatedmessenger.com/" Username="Venenatis sit">
 			<ViewModel:Site.Context>
-				<Discouser:DataContext Username="Pede metus morbi egestas euismod"/>
+				<Discouser:DataContext SiteName="Parturient penatibus integer" Username="Viverra vestibulum dictumst adipiscing aliquam">
+					<Discouser:DataContext.StorageDir>
+						<Storage:StorageFolder Attributes="Normal" DisplayType="Quisque parturient faucibus tincidunt dolor" DisplayName="Sed facilisi augue" FolderRelativeId="Vivamus vestibulum" Name="Vestibulum vestibulum adipiscing eleifend porttitor" Path="Proin duis"/>
+					</Discouser:DataContext.StorageDir>
+				</Discouser:DataContext>
 			</ViewModel:Site.Context>
+			<ViewModel:Site.Categories>
+				<ViewModel:Category Color="#FFFFFFB3" Description="Sociosqu natoque suscipit" Name="Vivamus" TextColor="#FFFFFFB3"/>
+				<ViewModel:Category Color="#FFBEBADA" Description="Potenti vitae imperdiet nec" Name="Aliquam" TextColor="#FFBEBADA"/>
+				<ViewModel:Category Color="#FFFB8072" Description="Volutpat pede" Name="Aliquet" TextColor="#FFFB8072"/>
+				<ViewModel:Category Color="#FFFDB462" Description="Parturient fusce quam quis lorem" Name="Elit" TextColor="#FFFDB462"/>
+				<ViewModel:Category Color="#FFB3DE69" Description="Vestibulum cras aptent malesuada" Name="Sem" TextColor="#FFB3DE69"/>
+			</ViewModel:Site.Categories>
 		</ViewModel:Site>
 	</ViewModel:AllSites.Sites>
 </ViewModel:AllSites>

@@ -19,7 +19,7 @@ namespace Discouser.Api
         public ApiConnection(string path, Guid guid)
         {
             path = path.EndsWith("/") ? path.Substring(0, path.Length - 1) : path;
-            path = path.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? path : "https://" + path;
+            path = path.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? path : "http://" + path;
             _host = path;
             _guid = guid;
 
@@ -49,7 +49,7 @@ namespace Discouser.Api
             var result = await Get("categories");
             if (result == null) return new Category[0];
             IEnumerable<JToken> categories = result["category_list"]["categories"];
-            return categories.Select(c => new Category() { Id = (int)c["id"], Description = (string)c["description"], Name = (string)c["name"] });
+            return categories.Select(c => new Category() { Id = (int)c["id"], Description = (string)c["description"], Name = (string)c["name"], Color = "0xFF" + c["color"], TextColor = "0xFF" + c["text_color"] });
         }
 
         internal async Task<string> GetPostHtml(string postId)

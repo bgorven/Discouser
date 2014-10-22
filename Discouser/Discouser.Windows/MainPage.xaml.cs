@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -34,12 +35,14 @@ namespace Discouser
             NewSiteUrl.Focus(FocusState.Programmatic);
         }
 
-        private void ActivateNewSiteAddButton(object sender, KeyRoutedEventArgs e)
+        private async void ActivateNewSiteAddButton(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Enter)
             {
                 NewSiteAddButton.Command.Execute(null);
                 NewSiteCancelAddButton.Focus(FocusState.Programmatic);
+                await Task.FromResult("This method is marked as async because the button command may be async." +
+                                      "Not sure if that's necessary, but it seemed slightly safer.");
             }
         }
     }

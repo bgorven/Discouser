@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,31 +10,36 @@ namespace Discouser.ViewModel
     class Site : ViewModelBase<Model.Site>
     {
         public Site() : this(new DataContext()) { }
+
         public Site(DataContext context)
         {
             _context = context;
         }
 
-        public override bool Equals(object obj)
+        public override void NotifyChanges(Model.Site model) { }
+
+        public override async Task LoadData()
         {
-            var other = obj as Site;
-            if (other == null) return false;
-            return Url == other.Url && Username == other.Username;
+            await _context.Initialize();
+            _categories = new ObservableCollection<Category>((await _context.AllCategories()).Select(model => new Category(model, _context)));
+            RaisePropertyChanged("Categories");
         }
 
-        public override int GetHashCode()
+        private ObservableCollection<Category> _categories;
+        public ObservableCollection<Category> Categories
         {
-            return Url.GetHashCode() ^ Username.GetHashCode();
-        }
-
-        public override void NotifyChanges(Model.Site model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task LoadChanges()
-        {
-            throw new NotImplementedException();
+            get
+            {
+                if (_categories == null)
+                {
+                    var task = LoadData();
+                }
+                return _categories;
+            }
+            set
+            {
+                _categories = value;
+            }
         }
 
         public DataContext Context { get { return _context; } }

@@ -159,15 +159,19 @@
     <Folder Include="Discouser\" />
   </ItemGroup>
   <ItemGroup>
-    <DesignData Include="SampleData\AllSitesSampleData.xaml" />
-  </ItemGroup>
-  <ItemGroup>
     <SDKReference Include="Microsoft.VCLibs, version=12.0">
       <Name>Microsoft Visual C++ 2013 Runtime Package for Windows</Name>
     </SDKReference>
     <SDKReference Include="SQLite.WinRT81, Version=3.8.7">
       <Name>SQLite for Windows Runtime %28Windows 8.1%29</Name>
     </SDKReference>
+  </ItemGroup>
+  <ItemGroup>
+    <DesignData Include="SampleData\AllSitesSampleData.xaml" />
+    <DesignData Include="SampleData\CategorySampleData.xaml" />
+    <DesignData Include="SampleData\PostSampleData.xaml" />
+    <DesignData Include="SampleData\SiteSampleData.xaml" />
+    <DesignData Include="SampleData\TopicSampleData.xaml" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

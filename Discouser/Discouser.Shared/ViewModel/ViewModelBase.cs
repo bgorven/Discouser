@@ -10,12 +10,25 @@ namespace Discouser.ViewModel
         protected DataContext _context;
         protected TModel _model;
 
-        internal ViewModelBase() { }
+        internal ViewModelBase()
+        {
+            LoadDataCommand = new Command(() => this.Changes, LoadData);
+        }
 
-        internal ViewModelBase(int id, DataContext context)
+        internal ViewModelBase(DataContext context) : this()
         {
             _context = context;
-            _model = _context.PersistentDbConnection.Get<TModel>(id);
+        }
+
+        internal ViewModelBase(int id, DataContext context) : this(context)
+        {
+            _model = context.PersistentDbConnection.Get<TModel>(id);
+
+        }
+
+        internal ViewModelBase(TModel model, DataContext context) : this(context)
+        {
+            _model = model;
         }
 
         internal TModel LoadModel()
@@ -27,7 +40,7 @@ namespace Discouser.ViewModel
         /// <summary>
         /// Used by the UI to indicate that there are changes available to load.
         /// </summary>
-        internal bool Changes
+        public bool Changes
         {
             get { return _changes; }
             set
@@ -45,12 +58,14 @@ namespace Discouser.ViewModel
         /// <summary>
         /// Called by the UI when the user is ready to see the changed data.
         /// </summary>
-        public virtual Task LoadChanges()
+        public virtual Task LoadData()
         {
             RaisePropertyChanged();
             Changes = false;
             return null;
         }
+
+        internal Command LoadDataCommand { get; private set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

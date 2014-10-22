@@ -41,7 +41,7 @@ namespace Discouser.ViewModel
         private bool CanAddNewSite()
         {
             return !string.IsNullOrEmpty(NewSiteUrl)
-                && Uri.IsWellFormedUriString(NewSiteUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? NewSiteUrl : "https://" + NewSiteUrl, UriKind.Absolute)
+                && Uri.IsWellFormedUriString(NewSiteUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? NewSiteUrl : "http://" + NewSiteUrl, UriKind.Absolute)
                 && !string.IsNullOrEmpty(NewSiteUsername)
                 && !string.IsNullOrEmpty(NewSitePassword);
         }
@@ -70,6 +70,8 @@ namespace Discouser.ViewModel
                 NewSiteLoading = false;
                 if (loggedInUser == username)
                 {
+                    await siteToAdd.Context.Initialize();
+                    await siteToAdd.LoadData();
                     AddSite(siteToAdd);
                     NewSiteUrl = "";
                     NewSiteUsername = "";

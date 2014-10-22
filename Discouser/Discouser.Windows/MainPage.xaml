@@ -8,15 +8,12 @@
     mc:Ignorable="d" d:DataContext="{d:DesignData /SampleData/AllSitesSampleData.xaml}">
 
     <Page.Resources>
-        <DataTemplate x:Key="SiteAppbarItemTemplate">
-        </DataTemplate>
-
         <local:InverseBooleanConverter x:Key="BooleanInverter" />
         <local:BooleanToVisibilityConverter x:Key="VisiblityConverter" />
         <local:InverseBooleanToVisibilityConverter x:Key="InverseVisiblityConverter" />
     </Page.Resources>
     <Page.TopAppBar>
-        <AppBar IsOpen="True">
+        <AppBar IsOpen="False">
             <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -26,14 +23,12 @@
                     <RowDefinition Height="76" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <!-- ItemTemplate="{StaticResource SiteAppbarItemTemplate}" -->
-                <ListView ItemsSource="{Binding Sites}"  Grid.Column="0" Grid.Row="0"
+                <ListView ItemsSource="{Binding Sites}" Grid.Column="0" Grid.Row="0" x:Name="AllSites"
 					ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
 					ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Left"  >
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel
-								Orientation="Horizontal" />
+                            <StackPanel Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                     <ListView.ItemTemplate>
@@ -55,10 +50,10 @@
                         <Image Source="Images/Add.png" />
                     </AppBarToggleButton.Content>
                 </AppBarToggleButton>
-                <Border Grid.Row="1" Grid.ColumnSpan="2" BorderThickness="2">
+                <Border Grid.Row="1" Grid.ColumnSpan="2" BorderThickness="6">
                     <Border.BorderBrush>
                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                            <GradientStop Color="#FF080808" Offset="0"/>
+                            <GradientStop Color="#FF000000" Offset="0"/>
                             <GradientStop Color="#FF404040" Offset="1"/>
                         </LinearGradientBrush>
                     </Border.BorderBrush>
@@ -93,5 +88,41 @@
             </Grid>
         </AppBar>
     </Page.TopAppBar>
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"/>
+    <Grid d:DataContext="{d:DesignData /SampleData/SiteSampleData.xaml}" DataContext="{Binding ElementName=AllSites, Path=SelectedItem}" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        
+        <ListView ItemsSource="{Binding Categories}" x:Name="AllCategories" CanReorderItems="True" SelectionMode="Extended">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Canvas Width="38" Height="38">
+                        <Button  Width="38" Height="38"
+                                Command="{Binding LoadDataCommand}" Background="{Binding Color}" 
+                                 ToolTipService.ToolTip="{Binding Name}" />
+                        <Image Source="Images/refresh.png" Width="38" Height="38"
+                                   Visibility="{Binding Changes, Converter={StaticResource VisiblityConverter}}"/>
+                    </Canvas>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView SelectionMode="None" ItemsSource="{Binding ElementName=AllCategories, Path=SelectedItems}">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate >
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
 </Page>

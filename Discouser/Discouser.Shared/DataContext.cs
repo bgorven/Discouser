@@ -16,7 +16,7 @@ namespace Discouser
         internal SQLiteConnection PersistentDbConnection { get; private set; }
         internal SQLiteConnection NewDbConnection() {  return new SQLiteConnection(_dbString); }
         internal Guid LocalGuid { get; private set; }
-        internal TimeSpan PollDelay { get; set; }
+        internal TimeSpan PollDelay { get; private set; }
         internal string FolderName { get; private set; }
         private string _dbString;
 
@@ -81,7 +81,7 @@ namespace Discouser
             }
         }
 
-        public async Task<ICollection<Category>> AllCategories()
+        public async Task<IEnumerable<Category>> AllCategories()
         {
             var categories = await Api.GetCategories();
 

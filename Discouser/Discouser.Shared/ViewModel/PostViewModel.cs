@@ -66,6 +66,11 @@ namespace Discouser.ViewModel
         public DateTime Created
         {
             get { return _model.Created; }
+			set
+            {
+                _model.Created = value;
+                RaisePropertyChanged("Created");
+            }
         }
 
         public string Text { get; private set; }

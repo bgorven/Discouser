@@ -50,9 +50,9 @@ namespace Discouser.Api
 
                 return await Deserialize(result);
             }
-            catch (Exception ex)
+            catch (Exception é)
             {
-                await _logger.Log(ex, "HttpRequest to " + path + "failed.");
+                await _logger.Log(é, "HttpRequest to " + path + "failed.");
                 return null;
             }
         }
@@ -77,9 +77,9 @@ namespace Discouser.Api
                 {
                     return JToken.ReadFrom(jsonTextReader);
                 }
-                catch (Exception ex)
+                catch (Exception é)
                 {
-                    await _logger.Log(ex, "Deserialize failed.");
+                    await _logger.Log(é, "Deserialize failed.");
                     return null;
                 }
             }
@@ -112,10 +112,13 @@ namespace Discouser.Api
                 query = query.Substring(0, query.Length - 1);
             }
 
-            var uri = new Uri(host + path + "?" + query);
+            var sendContent = !(method == HttpMethod.Put || method == HttpMethod.Post || method == HttpMethod.Patch);
+
+            var uri = new Uri(host + path + (sendContent ? "" : "?" + query));
 
             var request = new HttpRequestMessage(method, uri);
-            if (method == HttpMethod.Put || method == HttpMethod.Post || method == HttpMethod.Patch)
+
+            if (sendContent)
             {
                 request.Content = new HttpFormUrlEncodedContent(parameters);
             }
