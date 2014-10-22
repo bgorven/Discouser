@@ -1,4 +1,4 @@
-﻿<ViewModel:Category xmlns:ViewModel="using:Discouser.ViewModel" Changes="True" Color="#FF8DD3C7" Description="Curae donec accumsan vestibulum adipiscing" Name="Sed praesent" TextColor="#FF8DD3C7">
+﻿<ViewModel:Category xmlns:ViewModel="using:Discouser.ViewModel" Changes="True" Color="#FF8DD3C7" Description="Curae donec accumsan vestibulum adipiscing" Name="Sed praesent" TextColor="#FDD3C7FF">
 	<ViewModel:Category.Topics>
 		<ViewModel:Topic Activity="10/23/2014 01:54:26" Changes="True" Id="77" LatestMessage="30" Name="Mauris etiam">
 			<ViewModel:Topic.Posts>

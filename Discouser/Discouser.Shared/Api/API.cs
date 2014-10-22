@@ -49,7 +49,23 @@ namespace Discouser.Api
             var result = await Get("categories");
             if (result == null) return new Category[0];
             IEnumerable<JToken> categories = result["category_list"]["categories"];
-            return categories.Select(c => new Category() { Id = (int)c["id"], Description = (string)c["description"], Name = (string)c["name"], Color = "0xFF" + c["color"], TextColor = "0xFF" + c["text_color"] });
+            return categories.Select(c => new Category() { Id = (int)c["id"], Description = (string)c["description"], Name = (string)c["name"], Color = DecodeColor(c["color"]), TextColor = DecodeColor(c["text_color"]) });
+        }
+
+        private string DecodeColor(JToken jToken)
+        {
+            var color = (string)jToken;
+            if (color.Length == 3)
+            {
+                color = "" + color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+            }
+
+            if (color.Length < 8)
+            {
+                color = color.PadLeft(8, 'F');
+            }
+
+            return "#" + color;
         }
 
         internal async Task<string> GetPostHtml(string postId)

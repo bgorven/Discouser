@@ -94,7 +94,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         
-        <ListView ItemsSource="{Binding Categories}" x:Name="AllCategories" CanReorderItems="True" SelectionMode="Extended">
+        <ListView ItemsSource="{Binding Categories}" x:Name="AllCategories" CanReorderItems="True" SelectionMode="Single">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel />
@@ -103,8 +103,11 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Canvas Width="38" Height="38">
-                        <Button  Width="38" Height="38"
-                                Command="{Binding LoadDataCommand}" Background="{Binding Color}" 
+                        <Canvas.Background>
+                            <SolidColorBrush Color="{Binding Color}" />
+                        </Canvas.Background>
+                        <Button  Width="38" Height="38" BorderThickness="0"
+                                Command="{Binding LoadDataCommand}" 
                                  ToolTipService.ToolTip="{Binding Name}" />
                         <Image Source="Images/refresh.png" Width="38" Height="38"
                                    Visibility="{Binding Changes, Converter={StaticResource VisiblityConverter}}"/>
@@ -112,17 +115,26 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <ListView SelectionMode="None" ItemsSource="{Binding ElementName=AllCategories, Path=SelectedItems}">
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate >
-                    <VirtualizingStackPanel />
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <StackPanel Grid.Column="1" d:DataContext="{d:DesignData /SampleData/CategorySampleData.xaml}" DataContext="{Binding ElementName=AllCategories, Path=SelectedItem}">
+            <StackPanel>
+                <StackPanel.Background>
+                    <SolidColorBrush Color="{Binding Color}" />
+                </StackPanel.Background>
+                <TextBlock Text="{Binding Name}" Foreground="{Binding TextColor}" />
+                <TextBlock Text="{Binding Description}" Foreground="{Binding TextColor}" />
+            </StackPanel>
+            <ListView ItemsSource="{Binding Topics}">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
     </Grid>
 </Page>

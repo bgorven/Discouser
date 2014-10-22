@@ -65,7 +65,7 @@ namespace Discouser.ViewModel
             return null;
         }
 
-        internal Command LoadDataCommand { get; private set; }
+        public Command LoadDataCommand { get; private set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
