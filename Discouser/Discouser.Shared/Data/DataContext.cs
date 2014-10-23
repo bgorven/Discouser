@@ -37,7 +37,6 @@ namespace Discouser.Data
 
         public DataContext() : this("meta.discourse.org", "", Guid.Empty) { }
 
-
         /// <summary>
         /// Attempts to login with the login username and password if supplied, or the authorization
         /// token stored in the HttpClient's cookies.

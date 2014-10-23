@@ -75,76 +75,11 @@ namespace Discouser.Data
             return (string)result["cooked"];
         }
 
-        internal async Task<IEnumerable<Message>> TopicMessages(IEnumerable<KeyValuePair<string,string>> channels)
+        internal async Task<IEnumerable<Message>> Poll(IEnumerable<KeyValuePair<string,string>> channels)
         {
             IEnumerable<JToken> result = await Post("message-bus/" + _guid + "/poll", channels.ToArray());
             if (result == null) return new Message[0];
-            return result.Select(DecodeMessage);
-        }
-
-        private static Message DecodeMessage(JToken messageToDecode)
-        {
-            try
-            {
-
-                var channel = (string)messageToDecode["channel"];
-                if (channel == "__status")
-                {
-                    var messageResult = new StatusMessage(MessageId = (int)messageToDecode["message_id"]);
-                    messageResult.TopicMessageType = TopicMessage.TopicMessageTypes.Status;
-                    var statusMessage = ((JObject)messageToDecode["data"]).Properties().First();
-                    int topicNumber;
-                    if (int.TryParse(statusMessage.Name.Replace("/topic/", ""), out topicNumber))
-                    {
-                        messageResult.TopicId = topicNumber;
-                        messageResult.MessageId = (int)statusMessage.Value;
-                    }
-                    else
-                    {
-                        messageResult.TopicMessageType = Message.TopicMessageType.Unknown;
-                    }
-                }
-                else if (channel.StartsWith("/topic/"))
-                {
-                    var messageResult = new TopicMessage((int)messageToDecode["message_id"]);
-
-                    switch ((string)messageToDecode["data"]["type"])
-                    {
-                        case "Revised":
-                            messageResult.TopicMessageType = Message.TopicMessageType.Revised;
-                            break;
-                        case "Rebaked":
-                            messageResult.TopicMessageType = Message.TopicMessageType.Rebaked;
-                            break;
-                        case "Recovered":
-                            messageResult.TopicMessageType = Message.TopicMessageType.Recovered;
-                            break;
-                        case "Created":
-                            messageResult.TopicMessageType = Message.TopicMessageType.Created;
-                            break;
-                        case "Acted":
-                            messageResult.TopicMessageType = Message.TopicMessageType.Acted;
-                            break;
-                        case "Deleted":
-                            messageResult.TopicMessageType = Message.TopicMessageType.Deleted;
-                            break;
-                        default:
-                            messageResult.TopicMessageType = Message.TopicMessageType.Unknown;
-                            break;
-                    }
-                    if (messageResult.TopicMessageType != Message.TopicMessageType.Unknown)
-                    {
-                        messageResult.PostId = (int)messageToDecode["data"]["id"];
-                        messageResult.PostNumber = (int)messageToDecode["data"]["post_number"];
-                    }
-                }
-                
-                return messageResult;
-            }
-            catch (Exception)
-            {
-                return new Message() { TopicMessageType = Message.TopicMessageType.Unknown };
-            }
+            return result.Select(Message.Decode);
         }
 
 
