@@ -1,6 +1,8 @@
 ﻿using Discouser.Api;
 using SQLite;
 using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Discouser.ViewModel
@@ -36,27 +38,34 @@ namespace Discouser.ViewModel
             return _context.PersistentDbConnection.Get<TModel>(_model.Id);
         }
 
+        /// <summary>
+        /// <para>Called by the DataContext when there is a change available.</para>
+        /// <para>Updates the underlying data, then sets <code>Changes</code> to true.</para>
+        /// </summary>
+        public virtual void NotifyChanges(TModel changedModel)
+        {
+            _model = changedModel;
+            _changedProperties = GetType().GetTypeInfo().DeclaredProperties.Select(property => property.Name).ToArray();
+        }
+
         private volatile bool _changes = false;
         /// <summary>
-        /// Used by the UI to indicate that there are changes available to load.
+        /// Used by the UI to indicate that there are changes available.
         /// </summary>
         public bool Changes
         {
             get { return _changes; }
             set
             {
-                _changes = true;
+                _changes = value;
                 RaisePropertyChanged("Changes");
             }
         }
 
         /// <summary>
-        /// Called by the DataContext when there is a change available.
-        /// </summary>
-        public abstract void NotifyChanges(TModel model);
-
-        /// <summary>
-        /// Called by the UI when the user is ready to see the changed data.
+        /// <para>Called by the UI when the user is ready to see the changed data.</para>
+        /// <para>Raises property changed events for all properties changed by <code>NotifyChanges</code>, and clears 
+        /// the <code>Changes</code> property.</para>
         /// </summary>
         public virtual Task LoadData()
         {
