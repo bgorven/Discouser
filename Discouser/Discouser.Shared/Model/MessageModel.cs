@@ -5,7 +5,7 @@ namespace Discouser.Model
         /// <summary>
         /// https://github.com/discourse/discourse/blob/master/app/assets/javascripts/discourse/controllers/topic.js.es6
         /// </summary>
-        internal enum MessageType
+        internal enum TopicMessageType
         {
             Status,
             Revised,
@@ -22,6 +22,6 @@ namespace Discouser.Model
         public int TopicId { get; set; }
         public int PostNumber { get; set; }
         public int PostId { get; set; }
-        public MessageType Type { get; set; }
+        public TopicMessageType Type { get; set; }
     }
 }

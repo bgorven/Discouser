@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discouser.Api;
+using Discouser.Data;
 using Discouser.Model;
 using System.IO;
 using Windows.Storage;
 
-namespace Discouser
+namespace Discouser.Data
 {
     class DataContext : IDisposable
     {
@@ -24,6 +24,7 @@ namespace Discouser
         internal string SiteUrl { get; private set; }
         public string SiteName { get; private set; }
         public StorageFolder StorageDir { get; private set; }
+        private Task _poller;
 
         public DataContext(string url, string username, Guid guid)
         {
@@ -90,74 +91,6 @@ namespace Discouser
                 db.InsertAll(categories, "OR REPLACE");
 
                 return db.Table<Category>().ToList();
-            }
-        }
-
-        private volatile ViewModel.Topic _topicToWatch = null;
-
-        /// <summary>
-        /// Polls message bus for information about the active topic, updates the db if new information has arrived,
-        /// notifies the topic that there is new information available, then launches a new copy of its Watch task 
-        /// on a configurable delay. Polling of the current topic will end when a new topic is watched.
-        /// </summary>
-        public async Task MonitorTopic(ViewModel.Topic toWatch)
-        {
-            _topicToWatch = toWatch;
-
-            await new Watcher(toWatch, this).PollTopic();
-        }
-
-        private class Watcher
-        {
-            private DataContext _context;
-            private ViewModel.Topic _topicToWatch;
-
-            internal Watcher(ViewModel.Topic toWatch, DataContext context)
-            {
-                _topicToWatch = toWatch;
-                _context = context;
-            }
-
-            internal async Task PollTopic()
-            {
-                if (_context._topicToWatch != _topicToWatch) return;
-
-                var result = await _context.Api.TopicMessages(_topicToWatch.Id, _topicToWatch.LatestMessage);
-                foreach (var message in result)
-                {
-                    if (message.Type != TopicMessage.MessageType.Error && message.TopicId == _topicToWatch.Id)
-                    {
-                        _context.LatestTopicMessage(message.TopicId, message.MessageId);
-                        switch (message.Type)
-                        {
-                            case TopicMessage.MessageType.Created:
-                            case TopicMessage.MessageType.Recovered:
-                                await _context.DownloadPost(message.PostId);
-                                _topicToWatch.Changes = true;
-                                break;
-                            case TopicMessage.MessageType.Acted:
-                                await _context.DownloadLikes(message.PostId);
-                                _topicToWatch.UpdatePostInfo(message.PostNumber);
-                                break;
-                            case TopicMessage.MessageType.Rebaked:
-                            case TopicMessage.MessageType.Revised:
-                                await _context.DownloadPost(message.PostId);
-                                _topicToWatch.UpdatePost(message.PostNumber);
-                                break;
-                            case TopicMessage.MessageType.Deleted:
-                                _context.DeletePost(message.PostId);
-                                _topicToWatch.DeletePost(message.PostNumber);
-                                break;
-                        }
-                    }
-                }
-
-                var nextPoll = Task.Delay(_context.PollDelay).ContinueWith(PollTopic);
-            }
-
-            internal Task PollTopic(Task antecedent)
-            {
-                return PollTopic();
             }
         }
 

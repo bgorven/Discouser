@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Web.Http;
 
-namespace Discouser.Api
+namespace Discouser.Data
 {
     public partial class ApiConnection : IDisposable
     {
@@ -89,11 +89,11 @@ namespace Discouser.Api
                 var message = new TopicMessage() { MessageId = (int)m["message_id"] };
                 if ((string)m["channel"] == "__status")
                 {
-                    message.Type = TopicMessage.MessageType.Status;
+                    message.Type = TopicMessage.TopicMessageType.Status;
                     var statusMessage = ((JObject)m["data"]).Properties().First();
                     int topicNumber;
                     if (!int.TryParse( statusMessage.Name.Replace("/topic/", ""), out topicNumber)){
-                        message.Type = TopicMessage.MessageType.Unknown;
+                        message.Type = TopicMessage.TopicMessageType.Unknown;
                     }
                     else
                     {
@@ -106,28 +106,28 @@ namespace Discouser.Api
                     switch ((string)m["data"]["type"])
                     {
                         case "Revised":
-                            message.Type = TopicMessage.MessageType.Revised;
+                            message.Type = TopicMessage.TopicMessageType.Revised;
                             break;
                         case "Rebaked":
-                            message.Type = TopicMessage.MessageType.Rebaked;
+                            message.Type = TopicMessage.TopicMessageType.Rebaked;
                             break;
                         case "Recovered":
-                            message.Type = TopicMessage.MessageType.Recovered;
+                            message.Type = TopicMessage.TopicMessageType.Recovered;
                             break;
                         case "Created":
-                            message.Type = TopicMessage.MessageType.Created;
+                            message.Type = TopicMessage.TopicMessageType.Created;
                             break;
                         case "Acted":
-                            message.Type = TopicMessage.MessageType.Acted;
+                            message.Type = TopicMessage.TopicMessageType.Acted;
                             break;
                         case "Deleted":
-                            message.Type = TopicMessage.MessageType.Deleted;
+                            message.Type = TopicMessage.TopicMessageType.Deleted;
                             break;
                         default:
-                            message.Type = TopicMessage.MessageType.Unknown;
+                            message.Type = TopicMessage.TopicMessageType.Unknown;
                             break;
                     }
-                    if (message.Type != TopicMessage.MessageType.Unknown)
+                    if (message.Type != TopicMessage.TopicMessageType.Unknown)
                     {
                         message.PostId = (int)m["data"]["id"];
                         message.PostNumber = (int)m["data"]["post_number"];
@@ -137,7 +137,7 @@ namespace Discouser.Api
             }
             catch (Exception)
             {
-                return new TopicMessage() { Type = TopicMessage.MessageType.Unknown };
+                return new TopicMessage() { Type = TopicMessage.TopicMessageType.Unknown };
             }
         }
 

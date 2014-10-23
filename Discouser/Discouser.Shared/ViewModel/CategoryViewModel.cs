@@ -1,4 +1,4 @@
-﻿using Discouser.Api;
+﻿using Discouser.Data;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -24,11 +24,14 @@ namespace Discouser.ViewModel
                 .Select(t => new Topic(t, _context));
 
             var topicsChanged = topics.First().Activity != _topics.First().Activity;
-            if (topicsChanged) _topics = new ObservableCollection<Topic>(topics);
+            if (topicsChanged)
+            {
+                _topics = new ObservableCollection<Topic>(topics);
+            }
 
             if (model.Name != _model.Name || model.Description != _model.Description || topicsChanged )
             {
-                _changedProperties = new string[] { model.Name == _model.Name ? "" : "Name", model.Description == _model.Description ? "" : "Description", topicsChanged ? "" : "Topics" };
+                _changedProperties = new string[] { topicsChanged ? "" : "Topics", model.Name == _model.Name ? "" : "Name", model.Description == _model.Description ? "" : "Description", };
                 Changes = true;
             }
         }

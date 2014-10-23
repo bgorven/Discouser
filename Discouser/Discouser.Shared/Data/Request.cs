@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using System.IO;
 using Newtonsoft.Json.Linq;
 
-namespace Discouser.Api
+namespace Discouser.Data
 {
 
     public partial class ApiConnection

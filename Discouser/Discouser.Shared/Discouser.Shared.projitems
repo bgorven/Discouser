@@ -12,8 +12,8 @@
     <ApplicationDefinition Include="$(MSBuildThisFileDirectory)App.xaml">
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="$(MSBuildThisFileDirectory)Api\API.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Api\Request.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\API.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\Request.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>

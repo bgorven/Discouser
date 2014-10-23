@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using SQLite;
-using Discouser.Api;
+using Discouser.Data;
 using Discouser.Model;
 
 namespace Discouser.ViewModel
