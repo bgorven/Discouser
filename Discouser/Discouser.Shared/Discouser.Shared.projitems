@@ -13,17 +13,18 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="$(MSBuildThisFileDirectory)Data\API.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\DataContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\Messages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\Poller.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Request.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Logger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\CategoryModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\LikeModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\MessageModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Model.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\PostModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\LongTextModel.cs" />

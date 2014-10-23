@@ -94,7 +94,7 @@ namespace Discouser.Data
             }
         }
 
-        private void LatestTopicMessage(int topicId, int messageId)
+        internal void LatestTopicMessage(int topicId, int messageId)
         {
             using (var db = NewDbConnection())
             {
@@ -107,7 +107,7 @@ namespace Discouser.Data
             }
         }
 
-        private void DeletePost(int postId)
+        internal void DeletePost(int postId)
         {
             using (var db = NewDbConnection())
             {
@@ -120,7 +120,7 @@ namespace Discouser.Data
             }
         }
 
-        private async Task DownloadLikes(int id)
+        internal async Task DownloadLikes(int id)
         {
             using (var db = NewDbConnection())
             {
@@ -128,7 +128,7 @@ namespace Discouser.Data
             }
         }
 
-        private async Task DownloadPost(int id)
+        internal async Task DownloadPost(int id)
         {
             using (var db = NewDbConnection())
             {

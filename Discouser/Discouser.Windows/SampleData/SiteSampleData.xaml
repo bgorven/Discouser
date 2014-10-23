@@ -1,7 +1,7 @@
-﻿<ViewModel:Site xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser" xmlns:Storage="using:Windows.Storage" xmlns:System="using:System" xmlns:FileProperties="using:Windows.Storage.FileProperties" Logo="Ultricies sociis sit vestibulum taciti" SiteName="Nunc dictumst vestibulum fames" Url="http://www.adatum.com/" Username="Tristique pretium bibendum">
+﻿<ViewModel:Site xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser" xmlns:Data="using:Discouser.Data" xmlns:Storage="using:Windows.Storage" xmlns:System="using:System" xmlns:FileProperties="using:Windows.Storage.FileProperties" Logo="Ultricies sociis sit vestibulum taciti" SiteName="Nunc dictumst vestibulum fames" Url="http://www.adatum.com/" Username="Tristique pretium bibendum">
 	<ViewModel:Site.Context>
-		<Discouser:DataContext SiteName="Iaculis lacinia hendrerit" Username="Erat habitasse volutpat eros nibh">
-			<Discouser:DataContext.StorageDir>
+		<Data:DataContext SiteName="Iaculis lacinia hendrerit" Username="Erat habitasse volutpat eros nibh">
+			<Data:DataContext.StorageDir>
 				<Storage:StorageFolder Attributes="ReadOnly" DisplayType="Penatibus dolor primis porttitor" DisplayName="Ornare platea laoreet nec" FolderRelativeId="Non adipiscing praesent rutrum" Name="Himenaeos vestibulum imperdiet montes vestibulum" Path="Malesuada maecenas nostra augue">
 					<Storage:StorageFolder.DateCreated>
 						<System:DateTimeOffset/>
@@ -13,8 +13,8 @@
 						<FileProperties:StorageItemContentProperties/>
 					</Storage:StorageFolder.Properties>
 				</Storage:StorageFolder>
-			</Discouser:DataContext.StorageDir>
-		</Discouser:DataContext>
+			</Data:DataContext.StorageDir>
+		</Data:DataContext>
 	</ViewModel:Site.Context>
 	<ViewModel:Site.Categories>
 		<ViewModel:Category Color="#FF8DD3C7" Description="Vestibulum donec duis" Name="Phasellus nam integer consequat vestibulum" TextColor="Adipiscing cras parturient">
