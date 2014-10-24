@@ -6,7 +6,7 @@ using System.Text;
 namespace Discouser.Model
 {
     [Table("Likes")]
-    class Like : Model
+    class Like : IModel
     {
         [Ignore]
         public int Id { get; set; }

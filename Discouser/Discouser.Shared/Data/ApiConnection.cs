@@ -1,4 +1,5 @@
-﻿using Discouser.Model;
+﻿using Discouser.Data.Messages;
+using Discouser.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

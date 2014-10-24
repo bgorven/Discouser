@@ -3,7 +3,7 @@
 namespace Discouser.Model
 {
     [Table("RawText")]
-    class LongText : Model
+    class LongText : IModel
     {
         [PrimaryKey]
         public int Id { get; set; }

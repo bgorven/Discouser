@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Discouser.Model
 {
-    interface Model
+    interface IModel
     {
         int Id { get; }
     }

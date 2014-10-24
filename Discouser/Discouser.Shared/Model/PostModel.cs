@@ -4,7 +4,7 @@ using System;
 namespace Discouser.Model
 {
     [Table("Posts")]
-    class Post : Model
+    class Post : IModel
     {
         [PrimaryKey]
         public int Id { get; set; }

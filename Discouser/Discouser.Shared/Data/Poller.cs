@@ -1,4 +1,5 @@
-﻿using Discouser.Model;
+﻿using Discouser.Data.Messages;
+using Discouser.Model;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,7 +13,6 @@ namespace Discouser.Data
         private DataContext _context;
         private Logger _logger;
         private Task _task;
-        private IDictionary<string, string> channels = new ConcurrentDictionary<string, string>();
 
         public Poller(DataContext context, Logger logger)
         {
@@ -25,19 +25,26 @@ namespace Discouser.Data
             _task = Poll();
         }
 
-        internal void RegisterChannel(string channel, int status)
+        private IDictionary<string, string> channels = new ConcurrentDictionary<string, string>();
+        private IDictionary<int, Action<TopicMessage>> topicCallBacks = new ConcurrentDictionary<int, Action<TopicMessage>>();
+
+        internal void Register(Topic topic, Action<TopicMessage> callback)
         {
-            channels.Add(channel, status.ToString());
+            topicCallBacks[topic.Id] = callback;
         }
 
         internal async Task Poll()
         {
             var messages = await _context.Api.Poll(channels);
+            foreach (var message in messages)
+            {
+                await Process(message);
+            }
         }
 
 #pragma warning disable 1998
 
-        private Task ProcessMessage(Message message)
+        private Task Process(Message message)
         {
             return message.BeProcessedBy(this);
         }

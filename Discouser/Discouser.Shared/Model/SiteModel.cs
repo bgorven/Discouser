@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Discouser.Model
 {
-    class Site : Model
+    class Site : IModel
     {
         public int Id { get; set; }
     }

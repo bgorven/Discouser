@@ -3,7 +3,7 @@
 namespace Discouser.Model
 {
     [Table("Users")]
-    class User : Model
+    class User : IModel
     {
         [PrimaryKey]
         public int Id { get; set; }

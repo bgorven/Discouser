@@ -6,7 +6,7 @@ using System.Text;
 namespace Discouser.Model
 {
     [Table("Replies")]
-    class Reply : Model
+    class Reply : IModel
     {
         [PrimaryKey]
         public int Id { get; set; }

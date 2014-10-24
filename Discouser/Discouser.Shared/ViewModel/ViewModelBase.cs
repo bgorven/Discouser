@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Discouser.ViewModel
 {
-    abstract class ViewModelBase<TModel> : INotifyPropertyChanged where TModel : Model.Model, new()
+    abstract class ViewModelBase<TModel> : INotifyPropertyChanged where TModel : Model.IModel, new()
     {
         protected DataContext _context;
         protected TModel _model;
