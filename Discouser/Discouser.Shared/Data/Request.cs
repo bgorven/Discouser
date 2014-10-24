@@ -13,13 +13,6 @@ namespace Discouser.Data
 
     public partial class ApiConnection
     {
-        /// <summary>
-        /// Tuple.Create for kvp
-        /// </summary>
-        public static KeyValuePair<TName, TValue> Parameter<TName, TValue>(TName name, TValue value)
-        {
-            return new KeyValuePair<TName, TValue>(name, value);
-        }
 
         public Task<JToken> Get(string path, params KeyValuePair<string, string>[] parameters)
         {

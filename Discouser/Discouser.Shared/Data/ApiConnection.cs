@@ -35,7 +35,7 @@ namespace Discouser.Data
 
         internal async Task PostSession(string login, string password)
         {
-            await Post("session", Parameter("login", login), Parameter("password", password));
+            await Post("session", Utility.KeyValuePair("login", login), Utility.KeyValuePair("password", password));
         }
 
         internal async Task<Session> GetSessionCurrent()
@@ -102,9 +102,9 @@ namespace Discouser.Data
         internal async Task<IEnumerable<Like>> GetLikes(int id)
         {
             IEnumerable<JToken> result = await Get("post_actions/users", 
-                Parameter("id", id.ToString()), 
-                Parameter("post_action_type_id", PostActionTypes.Like.ToString()), 
-                Parameter("_", "wtf"));
+                Utility.KeyValuePair("id", id.ToString()), 
+                Utility.KeyValuePair("post_action_type_id", PostActionTypes.Like.ToString()), 
+                Utility.KeyValuePair("_", "wtf"));
             if (result == null) return new Like[0];
             return result.Select(user => new Like() { PostId = id, UserId = (int)user["id"] });
         }

@@ -8,7 +8,7 @@ namespace Discouser.Data.Messages
 {
     internal class TopicMessage : Message
     {
-        public TopicMessage(int id) : base(id) { }
+        public TopicMessage(int id, string channel) : base(id, channel) { }
 
         /// <summary>
         /// https://github.com/discourse/discourse/blob/master/app/assets/javascripts/discourse/controllers/topic.js.es6
@@ -28,9 +28,9 @@ namespace Discouser.Data.Messages
         public int PostId { get; set; }
         public Type TopicMessageType { get; set; }
 
-        public static TopicMessage Decode(JToken messageToDecode, int id)
+        public static TopicMessage Decode(JToken messageToDecode, int id, string channel)
         {
-            var messageResult = new TopicMessage(id);
+            var messageResult = new TopicMessage(id, channel);
 
             switch ((string)messageToDecode["data"]["type"])
             {

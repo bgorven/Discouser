@@ -24,7 +24,9 @@ namespace Discouser.Data
         internal string SiteUrl { get; private set; }
         public string SiteName { get; private set; }
         public StorageFolder StorageDir { get; private set; }
-        private Task _poller;
+        public Logger Logger { get; private set; }
+        public Poller Poller { get; private set; }
+
 
         public DataContext(string url, string username, Guid guid)
         {
@@ -33,6 +35,8 @@ namespace Discouser.Data
             LocalGuid = guid;
             Api = new ApiConnection(url, LocalGuid);
             FolderName = SiteUrl.Replace("http:", "").Replace("https:", "").Replace("/", "");
+            Logger = new Logger();
+            Poller = new Poller(this);
         }
 
         public DataContext() : this("meta.discourse.org", "", Guid.Empty) { }
@@ -119,19 +123,21 @@ namespace Discouser.Data
             }
         }
 
-        internal async Task DownloadLikes(int id)
+        internal async Task<Post> DownloadLikes(int id)
         {
             using (var db = NewDbConnection())
             {
-                db.InsertAll(await Api.GetLikes(id: id), "OR REPLACE");
+                db.InsertAll(await Api.GetLikes(id), "OR REPLACE");
+                return db.Get<Post>(id);
             }
         }
 
-        internal async Task DownloadPost(int id)
+        internal async Task<Post> DownloadPost(int id)
         {
             using (var db = NewDbConnection())
             {
                 db.InsertOrReplace(await Api.GetPost(id));
+                return db.Get<Post>(id);
             }
         }
 

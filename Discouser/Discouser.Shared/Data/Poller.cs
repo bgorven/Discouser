@@ -10,14 +10,19 @@ namespace Discouser.Data
 {
     class Poller : IDisposable
     {
+        private const string TopicPrefix = "/topic/";
+        private const string PostPrefix = "/post/";
+
         private DataContext _context;
         private Logger _logger;
         private Task _task;
+        private bool _cancelled;
 
-        public Poller(DataContext context, Logger logger)
+        public Poller(DataContext context)
         {
             _context = context;
-            _logger = logger;
+            _logger = context.Logger;
+            _cancelled = false;
         }
 
         public void Initialize()
@@ -25,20 +30,59 @@ namespace Discouser.Data
             _task = Poll();
         }
 
-        private IDictionary<string, string> channels = new ConcurrentDictionary<string, string>();
-        private IDictionary<int, Action<TopicMessage>> topicCallBacks = new ConcurrentDictionary<int, Action<TopicMessage>>();
-
-        internal void Register(Topic topic, Action<TopicMessage> callback)
+        public void Cancel()
         {
-            topicCallBacks[topic.Id] = callback;
+            _cancelled = true;
+        }
+
+        private IDictionary<string, string> channels = new Dictionary<string, string>();
+        private IDictionary<string, Action> callbacks = new Dictionary<string, Action>();
+
+        private void Register(string channel, Action callback, int latestMessage)
+        {
+            channels[channel] = latestMessage.ToString();
+            callbacks[channel] = callback;
+        }
+
+        private void Deregister(string channel)
+        {
+            channels.Remove(channel);
+            callbacks.Remove(channel);
+        }
+
+        internal void Register(Topic topic, Action callback, bool deregister = false)
+        {
+            if (deregister)
+            {
+                Deregister(TopicPrefix + topic.Id);
+            }
+            else
+            {
+                Register(TopicPrefix + topic.Id, callback, topic.LatestMessage);
+            }
+        }
+
+        internal void Register(Post post, Action callback, bool deregister = false)
+        {
+            if (deregister)
+            {
+                callbacks.Remove(PostPrefix + post.Id);
+            }
+            else
+            {
+                callbacks[PostPrefix + post.Id] = callback;
+            }
         }
 
         internal async Task Poll()
         {
-            var messages = await _context.Api.Poll(channels);
-            foreach (var message in messages)
+            while (!_cancelled)
             {
-                await Process(message);
+                var messages = await _context.Api.Poll(channels);
+                foreach (var message in messages)
+                {
+                    await Process(message);
+                }
             }
         }
 
@@ -58,34 +102,45 @@ namespace Discouser.Data
                 case TopicMessage.Type.Created:
                 case TopicMessage.Type.Recovered:
                     await _context.DownloadPost(message.PostId);
-                    //viewModel.UpdateTopic(message.TopicId);
+                    callbacks[message.Channel](
+                        );
                     break;
                 case TopicMessage.Type.Acted:
                     await _context.DownloadLikes(message.PostId);
-                    //viewModel.UpdatePostInfo(message.PostNumber);
+                    callbacks[PostPrefix + message.PostId](
+                        );
                     break;
                 case TopicMessage.Type.Rebaked:
                 case TopicMessage.Type.Revised:
                     await _context.DownloadPost(message.PostId);
-                    //viewModel.UpdatePost(message.PostNumber);
+                    callbacks[PostPrefix + message.PostId](
+                        );
                     break;
                 case TopicMessage.Type.Deleted:
                     _context.DeletePost(message.PostId);
-                    //viewModel.DeletePost(message.PostNumber);
+                    callbacks[PostPrefix + message.PostId](
+                        );
                     break;
             }
         }
 
-        internal async Task Process(ErrorMessage errorMessage) { }
+        internal async Task Process(ErrorMessage errorMessage)
+        {
+            await _logger.Log(errorMessage.RawMessage);
+        }
 
         internal async Task Process(StatusMessage statusMessage)
         {
-            channels[statusMessage.Channel] = statusMessage.ChannelStatus.ToString();
+            foreach (var update in statusMessage.Statuses)
+            {
+                channels[update.Key] = update.Value;
+            }
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _cancelled = true;
+            _task = null;
         }
     }
 }

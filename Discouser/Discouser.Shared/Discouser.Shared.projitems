@@ -37,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\TopicModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\UserInfoModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\UserModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\AllSites.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\CategoryViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\PostViewModel.cs" />
