@@ -7,6 +7,7 @@ using Windows.Web.Http;
 using Newtonsoft.Json;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using Windows.Web.Http.Headers;
 
 namespace Discouser.Data
 {
@@ -114,7 +115,9 @@ namespace Discouser.Data
             if (sendContent)
             {
                 request.Content = new HttpFormUrlEncodedContent(parameters);
+                request.Content.Headers.ContentType = new HttpMediaTypeHeaderValue("application/x-www-form-urlencoded");
             }
+            request.Headers.Connection.TryParseAdd("Keep-Alive");
 
             return request;
         }

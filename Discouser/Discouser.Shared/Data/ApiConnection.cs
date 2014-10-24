@@ -26,6 +26,7 @@ namespace Discouser.Data
 
             _client.DefaultRequestHeaders.UserAgent.ParseAdd("Buddy");
             _client.DefaultRequestHeaders.Append("X-Requested-With", "XMLHttpRequest");
+            _client.DefaultRequestHeaders.Append("X-SILENCE-LOGGER", "true");
     }
 
         public void Dispose()
@@ -101,7 +102,7 @@ namespace Discouser.Data
 
         internal async Task<IEnumerable<Like>> GetLikes(int id)
         {
-            IEnumerable<JToken> result = await Get("post_actions/users", 
+            IEnumerable<JToken> result = await Get("post_actions/users",
                 Utility.KeyValuePair("id", id.ToString()), 
                 Utility.KeyValuePair("post_action_type_id", PostActionTypes.Like.ToString()), 
                 Utility.KeyValuePair("_", "wtf"));

@@ -12,13 +12,14 @@ namespace Discouser.Data
 {
     class DataContext : IDisposable
     {
+        private string _dbString;
+
         internal ApiConnection Api { get; private set; }
         internal SQLiteConnection PersistentDbConnection { get; private set; }
         internal SQLiteConnection NewDbConnection() {  return new SQLiteConnection(_dbString); }
         internal Guid LocalGuid { get; private set; }
         internal TimeSpan PollDelay { get; private set; }
         internal string FolderName { get; private set; }
-        private string _dbString;
 
         public string Username { get; private set; }
         internal string SiteUrl { get; private set; }
