@@ -9,14 +9,14 @@ namespace Discouser.Data.Messages
     {
         public StatusMessage(int id, string channel) : base(id, channel) { }
 
-        public IEnumerable<KeyValuePair<string, string>> Statuses { get; private set; }
+        public IEnumerable<KeyValuePair<string, int>> Statuses { get; private set; }
 
         public static StatusMessage Decode(JToken messageToDecode, int id, string channel)
         {
             return new StatusMessage(id, channel)
             {
                 Statuses = ((JObject)messageToDecode["data"]).Properties()
-                                    .Select(statusData => Utility.KeyValuePair(statusData.Name, (string)statusData.Value))
+                                    .Select(statusData => Utility.KeyValuePair(statusData.Name, (int)statusData.Value))
             };
         }
 

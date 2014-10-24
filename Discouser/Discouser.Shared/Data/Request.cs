@@ -81,44 +81,43 @@ namespace Discouser.Data
 
         private static HttpRequestMessage BuildRequest(string host, string path, HttpMethod method, IEnumerable<KeyValuePair<string, string>> parameters)
         {
-            var query = "";
-            path = (path.StartsWith("/") ? "" : "/") + path + (path.EndsWith("/") ? "" : "/");
-
-            foreach (var kv in parameters)
+            var sendContent = !(method == HttpMethod.Put || method == HttpMethod.Post || method == HttpMethod.Patch);
+            
+            var query = "?";
+            if (!sendContent)
             {
-                var replacement = path.Replace("/" + kv.Key + "/", "/" + kv.Value + "/");
-                if (replacement != path)
-                {
-                    path = replacement;
-                }
-                else
+                path = (path.StartsWith("/") ? "" : "/") + path + (path.EndsWith("/") ? "" : "/");
+                foreach (var kv in parameters)
                 {
                     query += Uri.EscapeDataString(kv.Key) + "=" + Uri.EscapeDataString(kv.Value) + "&";
+                }
+                if (!string.IsNullOrEmpty(query))
+                {
+                    query = query.Substring(0, query.Length - 1);
                 }
             }
 
             if (!string.IsNullOrEmpty(path))
             {
-                path = path.Substring(0, path.Length - 1) + ".json";
+                if (path.Contains('?'))
+                {
+                    query = query.Replace('?', '&');
+                }
+                else
+                {
+                    path = path.Substring(0, path.Length - 1) + ".json";
+                }
             }
-            if (!string.IsNullOrEmpty(query))
-            {
-                query = query.Substring(0, query.Length - 1);
-            }
 
-            var sendContent = !(method == HttpMethod.Put || method == HttpMethod.Post || method == HttpMethod.Patch);
-
-            var uri = new Uri(host + path + (sendContent ? "" : "?" + query));
-
+            var uri = new Uri(host + path + (sendContent ? "" : query));
             var request = new HttpRequestMessage(method, uri);
+            request.Headers.Connection.TryParseAdd("Keep-Alive");
 
             if (sendContent)
             {
                 request.Content = new HttpFormUrlEncodedContent(parameters);
-                request.Content.Headers.ContentType = new HttpMediaTypeHeaderValue("application/x-www-form-urlencoded");
             }
-            request.Headers.Connection.TryParseAdd("Keep-Alive");
-
+            
             return request;
         }
     }

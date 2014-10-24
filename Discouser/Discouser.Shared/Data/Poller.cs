@@ -133,7 +133,7 @@ namespace Discouser.Data
         {
             foreach (var update in statusMessage.Statuses)
             {
-                channels[update.Key] = update.Value;
+                channels[update.Key] = update.Value.ToString();
             }
         }
 

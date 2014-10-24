@@ -70,20 +70,40 @@ namespace Discouser.Data
             return "#" + color;
         }
 
-        internal async Task<string> GetPostHtml(string postId)
-        {
-            var result = await Get("posts/" + postId);
-            if (result == null) return "<p>Download Failed :(</p>";
-            return (string)result["cooked"];
-        }
-
         internal async Task<IEnumerable<Message>> Poll(IEnumerable<KeyValuePair<string,string>> channels)
         {
-            IEnumerable<JToken> result = await Post("message-bus/" + _guid + "/poll", channels.ToArray());
+            var result = await Post("message-bus/" + _guid + "/poll", channels.ToArray());
             if (result == null) return new Message[0];
             return result.Select(Message.Decode);
         }
 
+        internal async Task<Tuple<IEnumerable<User>, IEnumerable<Post>, Topic>> DownloadEntireThread(int id)
+        {
+            var topic = new Topic();
+            string topicChannelString = "/topic/" + id;
+            string topicString = "/t/" + id;
+
+            topic.LatestMessage = -1;
+            var channel = Utility.KeyValuePair(topicChannelString, "-1");
+            var pollResult = await Post("message-bus/" + _guid + "/poll?dlp=t", new KeyValuePair<string, string>[] { channel });
+            if (pollResult != null)
+            {
+                var message = Message.Decode(pollResult.First()) as StatusMessage;
+                if (message != null) topic.LatestMessage = message.Statuses.Where(status => status.Key == topicChannelString).First().Value;
+            }
+
+            var result = await Get(topicString);
+            if (result == null) return null;
+
+            topic.Activity = (DateTime)result["last_posted_at"];
+            topic.CategoryId = (int)result["category_id"];
+            topic.Id = (int)result["id"];
+            topic.Name = (string)result["title"];
+
+            var postsJson = result["post_stream"]["posts"];
+            var stream = result["post_stream"]["stream"].Select(value => (int)value).Skip(postsJson.Count());
+
+        }
 
         /// <summary>
         /// https://github.com/discourse/discourse/blob/master/db/fixtures/003_post_action_types.rb
