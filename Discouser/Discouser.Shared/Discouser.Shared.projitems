@@ -30,7 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\LikeModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Model.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\PostModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\LongTextModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ReplyModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\SessionModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\SiteModel.cs" />
@@ -41,7 +40,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\AllSites.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\CategoryViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\PostViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ViewModel\LongTextViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\SiteViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\TopicViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\UserViewModel.cs" />

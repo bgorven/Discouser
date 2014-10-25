@@ -26,7 +26,7 @@ namespace Discouser.ViewModel
         public int AvatarId { get { return _model.AvatarId; } }
         public string Location { get { return _info.Location; } }
         public string Site {  get { return _info.Site; } }
-        public string Bio { get { return new LongText(_info.Bio, _context).Text; } }
+        public string Bio { get { return _info.BioText; } }
 
         public override void NotifyChanges(Model.User model)
         {
@@ -38,7 +38,7 @@ namespace Discouser.ViewModel
                 _model.DisplayName == model.DisplayName ? "" : "DisplayName",
                 _model.Title == model.Title ? "" : "Title",
                 _model.AvatarId == model.AvatarId ? "" : "AvatarId",
-                _info.Bio == info.Bio ? "" : "Bio",
+                _info.BioText == info.BioText ? "" : "Bio",
                 _info.Location == info.Location ? "" : "Location",
                 _info.Site == info.Site ? "" : "Site"
             };

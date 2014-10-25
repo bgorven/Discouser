@@ -22,17 +22,13 @@ namespace Discouser.ViewModel
             model = model ?? LoadModel();
             var changedProperties = new List<string>();
 
-            var text = model.TextCache ?? new LongText(_model.Text, _context).Text;
-            if (text != Text)
+            if (model.RawText != _model.RawText)
             {
-                Text = text;
                 changedProperties.Add("Text");
             }
 
-            var html = model.HtmlCache ?? new LongText(_model.Html, _context).Text;
-            if (text != Text)
+            if (model.HtmlText != _model.HtmlText)
             {
-                Html = html;
                 changedProperties.Add("Html");
             }
 
@@ -73,9 +69,9 @@ namespace Discouser.ViewModel
             }
         }
 
-        public string Text { get; private set; }
+        public string Text { get { return _model.RawText; } }
 
-        public string Html { get; private set; }
+        public string Html { get { return _model.HtmlText; } }
 
         public int LikeCount { get { return Likes.Count; } }
 

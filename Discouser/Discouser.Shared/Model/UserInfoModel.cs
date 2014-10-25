@@ -11,7 +11,7 @@ namespace Discouser.Model
         [PrimaryKey]
         public int Id { get; set; }
 
-        public int Bio { get; set; }
+        public string BioText { get; set; }
 
         public string Site { get; set; }
 

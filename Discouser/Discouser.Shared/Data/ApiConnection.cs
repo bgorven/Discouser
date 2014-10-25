@@ -2,6 +2,7 @@
 using Discouser.Model;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -100,10 +101,73 @@ namespace Discouser.Data
             topic.Id = (int)result["id"];
             topic.Name = (string)result["title"];
 
-            var postsJson = result["post_stream"]["posts"];
-            var stream = result["post_stream"]["stream"].Select(value => (int)value).Skip(postsJson.Count());
+            var posts = new Dictionary<int, Post>();
+            var users = new Dictionary<int, User>();
+            var replies = new List<Reply>();
+            var poststream = result["post_stream"]["posts"];
+            var stream = result["post_stream"]["stream"].Select(value => (int)value);
 
+            foreach (var token in await GetRawPostStream(topicString, stream))
+            {
+                DecodePostToken(token, posts, users, replies);
+            }
+
+            return new Tuple<IEnumerable<User>, IEnumerable<Post>, Topic>(users.Values, posts.Values, topic);
         }
+
+        private static void DecodePostToken(JToken token, Dictionary<int, Post> posts, Dictionary<int, User> users, List<Reply> replies)
+        {
+            var user = ExtractUserFromPost(token);
+            users[user.Id] = user;
+            if (token["reply_to_post_number"] != null)
+            {
+                var reply = new Reply()
+                {
+                    OriginalPostId = posts[(int)token["reply_to_post_number"]].Id,
+                    ReplyPostId = (int)token["id"],
+                };
+                replies.Add(reply);
+            }
+            var post = DecodePost(token);
+            posts[post.PostNumberInTopic] = post;
+        }
+
+        private async Task<IEnumerable<JToken>> GetRawPostStream(string topicString, IEnumerable<int> stream)
+        {
+            var streamParameters = stream.Select(id => Utility.KeyValuePair("post_ids[]", id.ToString())).ToList();
+            streamParameters.Add(Utility.KeyValuePair("_", "wtf"));
+            var result = await Get(topicString + "/posts", streamParameters.ToArray());
+
+            if (result == null) return new JToken[0];
+            else return result["post_stream"]["posts"];
+        }
+
+        private static Post DecodePost(JToken post)
+        {
+            return new Post()
+            {
+                Created = (DateTime)post["created_at"],
+                Deleted = post["deleted_at"] != null,
+                HtmlText = (string)post["cooked"],
+                Id = (int)post["id"],
+                PostNumberInTopic = (int)post["post_number"],
+                TopicId = (int)post["topic_id"],
+                UserId = (int)post["user_id"],
+            };
+        }
+
+        private static User ExtractUserFromPost(JToken post)
+        {
+            return new User()
+            {
+                Id = (int)post["user_id"],
+                AvatarId = (int)post["uploaded_avatar_id"],
+                Username = (string)post["username"],
+                DisplayName = (string)post["name"],
+                Title = (string)post["user_title"],
+            };
+        }
+
 
         /// <summary>
         /// https://github.com/discourse/discourse/blob/master/db/fixtures/003_post_action_types.rb

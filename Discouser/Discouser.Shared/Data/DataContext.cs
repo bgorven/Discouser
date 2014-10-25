@@ -75,7 +75,6 @@ namespace Discouser.Data
             using (var db = NewDbConnection())
             {
                 db.CreateTable<Category>();
-                db.CreateTable<LongText>();
                 db.CreateTable<UserInfo>();
                 db.CreateTable<Topic>();
                 db.CreateTable<Reply>();
