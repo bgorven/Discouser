@@ -196,9 +196,8 @@ namespace Discouser.Data
 
         /// <summary>
         /// <para>Note that the value of Reply.OriginalPostId returned here is actually the post number within the current topic :(</para>
-        /// <para>The first string is the raw text, the second is the cooked.</para>
         /// </summary>
-        internal async Task<Tuple<User,Post,string,string,Reply>> GetPost(int id)
+        internal async Task<Tuple<User,Post,Reply>> GetPost(int id)
         {
             var result = await Get("posts/" + id);
             if (result == null) return null;
@@ -215,11 +214,11 @@ namespace Discouser.Data
                 {
                     Id = id,
                     TopicId = (int)result["topic_id"],
+                    RawText = (string)result["raw"],
+                    HtmlText = (string)result["cooked"],
                     UserId = (int)result["user_id"],
                     Created = (DateTime)result["created_at"],
                 },
-                (string)result["raw"],
-                (string)result["cooked"],
                 result["reply_to_post_number"] == null ? null : new Reply()
                 {
                     ReplyPostId = id,
