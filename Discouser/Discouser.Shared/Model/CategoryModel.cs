@@ -15,5 +15,7 @@ namespace Discouser.Model
         public string Color { get; set; }
 
         public string TextColor { get; set; }
+
+        public int PagesFetched { get; set; }
     }
 }

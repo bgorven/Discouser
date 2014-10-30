@@ -17,7 +17,7 @@ namespace Discouser.ViewModel
             _context = context;
         }
 
-        public override void NotifyChanges(Model.Site model) { }
+        public override async Task NotifyChanges(Model.Site model) { await Task.FromResult(0); }
 
         public override async Task LoadData()
         {

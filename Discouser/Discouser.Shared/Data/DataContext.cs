@@ -15,18 +15,19 @@ namespace Discouser.Data
         private string _dbString;
 
         internal ApiConnection Api { get; private set; }
-        internal SQLiteConnection PersistentDbConnection { get; private set; }
-        internal SQLiteConnection NewDbConnection() {  return new SQLiteConnection(_dbString); }
         internal Guid LocalGuid { get; private set; }
         internal TimeSpan PollDelay { get; private set; }
         internal string FolderName { get; private set; }
 
         public string Username { get; private set; }
         internal string SiteUrl { get; private set; }
+
         public string SiteName { get; private set; }
         public StorageFolder StorageDir { get; private set; }
         public Logger Logger { get; private set; }
         public Poller Poller { get; private set; }
+
+        private SQLiteAsyncConnection _db;
 
 
         public DataContext(string url, string username, Guid guid)
@@ -70,9 +71,9 @@ namespace Discouser.Data
             StorageDir = await ApplicationData.Current.RoamingFolder.CreateFolderAsync(FolderName, CreationCollisionOption.OpenIfExists);
             _dbString = Path.Combine(StorageDir.Path, Username + ".db");
 
-            PersistentDbConnection = NewDbConnection();
+            _db = new SQLiteAsyncConnection(_dbString);
 
-            using (var db = NewDbConnection())
+            await DbTransaction(db =>
             {
                 db.CreateTable<Category>();
                 db.CreateTable<UserInfo>();
@@ -82,24 +83,37 @@ namespace Discouser.Data
                 db.CreateTable<Post>();
                 db.CreateTable<User>();
                 db.CreateTable<Site>();
-            }
+            });
+        }
+
+        public async Task DbTransaction(Action<SQLiteConnection> action)
+        {
+            await DbTransaction(action);
         }
 
         public async Task<IEnumerable<Category>> AllCategories()
         {
             var categories = await Api.GetCategories();
 
-            using (var db = NewDbConnection())
+            IEnumerable<Category> result = null;
+            await DbTransaction(db =>
             {
                 db.InsertAll(categories, "OR REPLACE");
 
-                return db.Table<Category>().ToList();
-            }
+                result = db.Table<Category>().ToList();
+            });
+
+            return result;
         }
 
-        internal void LatestTopicMessage(int topicId, int messageId)
+        internal Task DownloadCategory(int id, int pageToGet)
         {
-            using (var db = NewDbConnection())
+            throw new NotImplementedException();
+        }
+
+        internal async Task LatestTopicMessage(int topicId, int messageId)
+        {
+            await DbTransaction(db =>
             {
                 var topic = db.Get<Topic>(topicId);
                 if (topic != null)
@@ -107,12 +121,12 @@ namespace Discouser.Data
                     topic.LatestMessage = messageId;
                     db.Update(topic);
                 }
-            }
+            });
         }
 
-        internal void DeletePost(int postId)
+        internal async Task DeletePost(int postId)
         {
-            using (var db = NewDbConnection())
+            await DbTransaction(db =>
             {
                 var post = db.Get<Post>(postId);
                 if (post != null)
@@ -120,34 +134,30 @@ namespace Discouser.Data
                     post.Deleted = true;
                     db.Update(post);
                 }
-            }
+            });
         }
 
-        internal async Task<Post> DownloadLikes(int id)
+        internal async Task DownloadLikes(int id)
         {
-            using (var db = NewDbConnection())
+            var likes = await Api.GetLikes(id);
+
+            await DbTransaction(db =>
             {
-                db.InsertAll(await Api.GetLikes(id), "OR REPLACE");
-                return db.Get<Post>(id);
-            }
+                db.InsertAll(likes, "OR REPLACE");
+            });
         }
 
-        internal async Task<Post> DownloadPost(int id)
+        internal async Task DownloadPost(int id)
         {
-            using (var db = NewDbConnection())
+            var post = await Api.GetPost(id);
+            await DbTransaction(db =>
             {
-                db.InsertOrReplace(await Api.GetPost(id));
-                return db.Get<Post>(id);
-            }
+                db.InsertOrReplace(post);
+            });
         }
 
         public void Dispose()
         {
-            if (PersistentDbConnection != null)
-            {
-                PersistentDbConnection.Dispose();
-                PersistentDbConnection = null;
-            }
             if (Api != null)
             {
                 Api.Dispose();

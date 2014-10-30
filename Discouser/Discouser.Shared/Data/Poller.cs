@@ -95,7 +95,7 @@ namespace Discouser.Data
 
         internal async Task Process(TopicMessage message)
         {
-            _context.LatestTopicMessage(message.TopicId, message.MessageId);
+            await _context.LatestTopicMessage(message.TopicId, message.MessageId);
 
             switch (message.TopicMessageType)
             {
@@ -117,7 +117,7 @@ namespace Discouser.Data
                         );
                     break;
                 case TopicMessage.Type.Deleted:
-                    _context.DeletePost(message.PostId);
+                    await _context.DeletePost(message.PostId);
                     callbacks[PostPrefix + message.PostId](
                         );
                     break;

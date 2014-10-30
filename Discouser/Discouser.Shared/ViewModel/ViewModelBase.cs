@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Discouser.ViewModel
 {
-    abstract class ViewModelBase<TModel> : INotifyPropertyChanged where TModel : Model.IModel, new()
+    abstract class ViewModelBase<TModel> : INotifyPropertyChanged where TModel : class, Model.IModel, new()
     {
         protected DataContext _context;
         protected TModel _model;
@@ -22,29 +22,25 @@ namespace Discouser.ViewModel
             _context = context;
         }
 
-        internal ViewModelBase(int id, DataContext context) : this(context)
-        {
-            _model = context.PersistentDbConnection.Get<TModel>(id);
-
-        }
-
         internal ViewModelBase(TModel model, DataContext context) : this(context)
         {
             _model = model;
         }
 
-        internal TModel LoadModel()
+        internal async Task<TModel> LoadModel()
         {
-            return _context.PersistentDbConnection.Get<TModel>(_model.Id);
+            TModel result = null;
+            await _context.DbTransaction(db => result = db.Get<TModel>(_model.Id));
+            return result;
         }
 
         /// <summary>
         /// <para>Called by the DataContext when there is a change available.</para>
         /// <para>Updates the underlying data, then sets <code>Changes</code> to true.</para>
         /// </summary>
-        public virtual void NotifyChanges(TModel changedModel)
+        public virtual async Task NotifyChanges(TModel changedModel = null)
         {
-            _model = changedModel;
+            _model = changedModel ?? await LoadModel();
             _changedProperties = GetType().GetTypeInfo().DeclaredProperties.Select(property => property.Name).ToArray();
         }
 

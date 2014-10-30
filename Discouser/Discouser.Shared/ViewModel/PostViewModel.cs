@@ -10,16 +10,15 @@ namespace Discouser.ViewModel
 {
     class Post : ViewModelBase<Model.Post>
     {
-        public Post(int id, DataContext context) : base(id, context) { }
         public Post(Model.Post model, DataContext context)
         {
             _model = model;
             _context = context;
         }
 
-        public override void NotifyChanges(Model.Post model)
+        public override async Task NotifyChanges(Model.Post model)
         {
-            model = model ?? LoadModel();
+            model = model ?? await LoadModel();
             var changedProperties = new List<string>();
 
             if (model.RawText != _model.RawText)
@@ -32,32 +31,42 @@ namespace Discouser.ViewModel
                 changedProperties.Add("Html");
             }
 
-            if (_context.PersistentDbConnection.Table<Model.Reply>().Where(reply => reply.ReplyPostId == _model.Id).Count() != RepliesTo.Count)
+            await _context.DbTransaction(Db =>
             {
-                RepliesTo = new ObservableCollection<Post>(_context.PersistentDbConnection.Table<Model.Reply>()
-                    .Where(reply => reply.ReplyPostId == _model.Id).ToList()
-                    .Select(reply => new Post(reply.OriginalPostId, _context)));
-                changedProperties.Add("RepliesTo");
-            }
+                if (Db.Table<Model.Reply>().Where(reply => reply.ReplyPostId == _model.Id).Count() != RepliesTo.Count)
+                {
+                    RepliesTo = new ObservableCollection<Post>(Db.Table<Model.Reply>()
+                        .Where(reply => reply.ReplyPostId == _model.Id).ToList()
+                        .Select(reply => new Post(Db.Get<Model.Post>(reply.OriginalPostId), _context)));
+                    changedProperties.Add("RepliesTo");
+                }
 
-            if (_context.PersistentDbConnection.Table<Model.Reply>().Where(reply => reply.OriginalPostId == _model.Id).Count() != Replies.Count)
-            {
-                Replies = new ObservableCollection<Post>(_context.PersistentDbConnection.Table<Model.Reply>()
-                    .Where(reply => reply.OriginalPostId == _model.Id).ToList()
-                    .Select(reply => new Post(reply.ReplyPostId, _context)));
-                changedProperties.Add("Replies");
-            }
+                if (Db.Table<Model.Reply>().Where(reply => reply.OriginalPostId == _model.Id).Count() != Replies.Count)
+                {
+                    Replies = new ObservableCollection<Post>(Db.Table<Model.Reply>()
+                        .Where(reply => reply.OriginalPostId == _model.Id).ToList()
+                        .Select(reply => new Post(Db.Get<Model.Post>(reply.ReplyPostId), _context)));
+                    changedProperties.Add("Replies");
+                }
 
-            var likeCount = _context.PersistentDbConnection.Table<Model.Like>().Where(like => like.PostId == _model.Id).Count();
-            if (likeCount != LikeCount)
-            {
-                RaisePropertyChanged(new string[] { "LikeCount", "Likes" });
-            }
+                var likeCount = Db.Table<Model.Like>().Where(like => like.PostId == _model.Id).Count();
+                if (likeCount != LikeCount)
+                {
+                    RaisePropertyChanged(new string[] { "LikeCount", "Likes" });
+                }
 
-            Changes = false;
+                if (User == null)
+                {
+                    User = new User(Db.Get<Model.User>(model.UserId), Db.Get<Model.UserInfo>(model.UserId), _context);
+                    changedProperties.Add("User");
+                }
+            });
+
+            Changes = changedProperties.Any();
+            _changedProperties = changedProperties.ToArray();
         }
 
-        public User User { get { return new User(_model.UserId, _context); } }
+        public User User { get; private set; }
 
         public DateTime Created
         {

@@ -10,24 +10,29 @@ namespace Discouser.ViewModel
 {
     class Topic : ViewModelBase<Model.Topic>
     {
-
-        public Topic(int id, DataContext context) : base(id, context) { }
-
         public Topic(Model.Topic model, DataContext context)
         {
             _model = model;
             _context = context;
         }
 
-        public override void NotifyChanges(Model.Topic model)
+        public override async Task NotifyChanges(Model.Topic model)
         {
-            _model = _context.PersistentDbConnection.Get<Model.Topic>(_model.Id);
-            Posts = new ObservableCollection<Post>(
-                    _context.PersistentDbConnection.Table<Model.Post>()
+            _model = model ?? await LoadModel();
+
+            System.Collections.Generic.List<Model.Post> postList = null;
+            await _context.DbTransaction(Db =>
+            {
+                postList = Db.Table<Model.Post>()
                     .Where(t => t.TopicId == _model.Id)
                     .OrderByDescending(t => t.Created)
-                    .ToList()
-                    .Select(p => new Post(p, _context)));
+                    .ToList();
+            });
+
+            if (postList != null)
+            {
+                Posts = new ObservableCollection<Post>(postList.Select(p => new Post(p, _context)));
+            }
 
             _changedProperties = new string[] { "Name", "CategoryId", "Activity", "Posts" };
         }

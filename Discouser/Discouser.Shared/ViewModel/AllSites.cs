@@ -135,7 +135,7 @@ namespace Discouser.ViewModel
             }
         }
 
-        public override void NotifyChanges(Model.Site model)
+        public override Task NotifyChanges(Model.Site model)
         {
             throw new NotImplementedException();
         }

@@ -10,14 +10,19 @@ namespace Discouser.ViewModel
     {
         private UserInfo _info;
 
-        public User(int id, DataContext context) : base(id, context)
+        public User(Model.User user, Model.UserInfo info, DataContext context) : base(user, context)
         {
-            _info = LoadInfo();
+            _info = info;
         }
 
-        private UserInfo LoadInfo()
+        private async Task<UserInfo> LoadInfo(int id)
         {
-            return _context.PersistentDbConnection.Get<UserInfo>(_model.Id);
+            UserInfo result = null;
+            await _context.DbTransaction(Db =>
+            {
+                result = Db.Get<UserInfo>(id);
+            });
+            return result;
         }
 
         public string Username { get { return _model.Username; } }
@@ -28,10 +33,10 @@ namespace Discouser.ViewModel
         public string Site {  get { return _info.Site; } }
         public string Bio { get { return _info.BioText; } }
 
-        public override void NotifyChanges(Model.User model)
+        public override async Task NotifyChanges(Model.User model)
         {
-            model = model ?? LoadModel();
-            var info = LoadInfo();
+            model = model ?? await LoadModel();
+            var info = await LoadInfo(model.Id);
 
             _changedProperties = new String[] {
                 _model.Username == model.Username ? "" : "Username",
