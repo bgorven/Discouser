@@ -10,6 +10,7 @@ using Windows.Web.Http;
 
 namespace Discouser.Data
 {
+    //The other half of this class is in Request.cs -- will be decoupled ‘eventually’.
     public partial class ApiConnection : IDisposable
     {
         private readonly HttpClient _client = new HttpClient();
