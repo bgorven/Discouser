@@ -10,28 +10,32 @@ namespace Discouser.ViewModel
 {
     class Category : ViewModelBase<Model.Category>
     {
-        public Category(Model.Category model, DataContext context) : base(model, context) { }
+        public Category(Model.Category model, DataContext context) : base(context, model) { }
+
+        public override async Task Initialize()
+        {
+            if (!_model.Initialized)
+            {
+                await _context.InitializeCategory(_model);
+            }
+        }
 
         public override async Task NotifyChanges(Model.Category model)
         {
             model = model ?? await LoadModel();
 
-            await _context.DownloadCategory(model.Id, model.PagesFetched);
-
-            IEnumerable<Topic> topics = null;
             var topicsChanged = false;
 
-            await _context.DbTransaction( db =>
-                topics = db.Table<Model.Topic>()
+            var topics = await _context.DbTransaction( db => db.Table<Model.Topic>()
                 .Where(t => t.CategoryId == model.Id)
                 .OrderByDescending(t => t.Activity)
                 .ToList()
                 .Select(t => new Topic(t, _context))
             );
 
-            if (topics != null)
+            if (topics != null && topics.Any())
             {
-                topicsChanged = topics.First().Activity != _topics.First().Activity;
+                topicsChanged = _topics == null || !_topics.Any() || topics.First().Activity != _topics.First().Activity;
                 if (topicsChanged)
                 {
                     _topics = new ObservableCollection<Topic>(topics);

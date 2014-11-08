@@ -10,19 +10,15 @@ namespace Discouser.ViewModel
     {
         private UserInfo _info;
 
-        public User(Model.User user, Model.UserInfo info, DataContext context) : base(user, context)
+        public User(Model.User user, Model.UserInfo info, DataContext context)
+            : base(context, user)
         {
             _info = info;
         }
 
         private async Task<UserInfo> LoadInfo(int id)
         {
-            UserInfo result = null;
-            await _context.DbTransaction(Db =>
-            {
-                result = Db.Get<UserInfo>(id);
-            });
-            return result;
+            return await _context.DbTransaction(Db => Db.Get<UserInfo>(id));
         }
 
         public string Username { get { return _model.Username; } }

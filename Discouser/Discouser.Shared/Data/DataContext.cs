@@ -84,6 +84,8 @@ namespace Discouser.Data
                 db.CreateTable<User>();
                 db.CreateTable<Site>();
             });
+
+            await InitializeSite();
         }
 
         public async Task DbTransaction(Action<SQLiteConnection> action)
@@ -91,24 +93,54 @@ namespace Discouser.Data
             await _db.RunInTransactionAsync(action);
         }
 
-        public async Task<IEnumerable<Category>> AllCategories()
+        public async Task<T> DbTransaction<T>(Func<SQLiteConnection,T> action)
         {
-            var categories = await Api.GetCategories();
-
-            IEnumerable<Category> result = null;
-            await DbTransaction(db =>
-            {
-                db.InsertAll(categories, "OR REPLACE");
-
-                result = db.Table<Category>().ToList();
-            });
-
+            T result = default(T);
+            await _db.RunInTransactionAsync(db => result = action(db));
             return result;
         }
 
-        internal Task DownloadCategory(int id, int pageToGet)
+        public async Task InitializeSite()
         {
-            throw new NotImplementedException();
+            var categories = await Api.GetAllCategories();
+
+            await DbTransaction(db => db.InsertAll(categories, "OR REPLACE"));
+
+        }
+
+        public async Task<IEnumerable<Category>> AllCategories()
+        {
+            return await DbTransaction(db => db.Table<Category>().ToList());
+        }
+
+        internal async Task InitializeCategory(Category category)
+        {
+            var result = await DownloadCategory(category, 0);
+            if (result)
+            {
+                var backgroundTask = Task.Run(async () =>
+                {
+                    var nextPage = 1;
+                    try
+                    {
+                        while (await DownloadCategory(category, nextPage)) nextPage++;
+
+                        category.Initialized = true;
+                        await DbTransaction(db => db.Update(category));
+                    }
+                    catch (Exception é)
+                    {
+                        var task = Logger.Log(é);
+                    }
+                });
+            }
+        }
+
+        internal async Task<bool> DownloadCategory(Category category, int pageToGet)
+        {
+            var result = await Api.GetCategoryPage(category.Path, pageToGet);
+            await DbTransaction(db => db.InsertAll(result.Item1, "OR REPLACE"));
+            return result.Item2;
         }
 
         internal async Task LatestTopicMessage(int topicId, int messageId)
@@ -141,19 +173,13 @@ namespace Discouser.Data
         {
             var likes = await Api.GetLikes(id);
 
-            await DbTransaction(db =>
-            {
-                db.InsertAll(likes, "OR REPLACE");
-            });
+            await DbTransaction(db => db.InsertAll(likes, "OR REPLACE"));
         }
 
         internal async Task DownloadPost(int id)
         {
             var post = await Api.GetPost(id);
-            await DbTransaction(db =>
-            {
-                db.InsertOrReplace(post);
-            });
+            await DbTransaction(db => db.InsertOrReplace(post));
         }
 
         public void Dispose()

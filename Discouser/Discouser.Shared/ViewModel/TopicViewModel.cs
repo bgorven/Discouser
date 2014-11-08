@@ -20,14 +20,10 @@ namespace Discouser.ViewModel
         {
             _model = model ?? await LoadModel();
 
-            System.Collections.Generic.List<Model.Post> postList = null;
-            await _context.DbTransaction(Db =>
-            {
-                postList = Db.Table<Model.Post>()
+            var postList = await _context.DbTransaction(Db => Db.Table<Model.Post>()
                     .Where(t => t.TopicId == _model.Id)
                     .OrderByDescending(t => t.Created)
-                    .ToList();
-            });
+                    .ToList());
 
             if (postList != null)
             {

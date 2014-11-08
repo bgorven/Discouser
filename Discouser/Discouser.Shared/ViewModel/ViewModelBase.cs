@@ -11,28 +11,21 @@ namespace Discouser.ViewModel
     {
         protected DataContext _context;
         protected TModel _model;
+        protected static readonly Task _nullTask = Task.Delay(0);
 
-        internal ViewModelBase()
-        {
-            LoadDataCommand = new Command(() => this.Changes, LoadData);
-        }
-
-        internal ViewModelBase(DataContext context) : this()
+        internal ViewModelBase(DataContext context = null, TModel model = null)
         {
             _context = context;
-        }
-
-        internal ViewModelBase(TModel model, DataContext context) : this(context)
-        {
             _model = model;
+            LoadDataCommand = new Command(() => this.Changes, LoadData);
         }
 
         internal async Task<TModel> LoadModel()
         {
-            TModel result = null;
-            await _context.DbTransaction(db => result = db.Get<TModel>(_model.Id));
-            return result;
+            return await _context.DbTransaction(db => db.Get<TModel>(_model.Id));
         }
+
+        public virtual Task Initialize() { return _nullTask; }
 
         /// <summary>
         /// <para>Called by the DataContext when there is a change available.</para>
@@ -67,7 +60,18 @@ namespace Discouser.ViewModel
         {
             RaisePropertyChanged();
             Changes = false;
-            return null;
+            return _nullTask;
+        }
+
+        public virtual async void OnLoad()
+        {
+            await Initialize();
+            await NotifyChanges();
+            if (Changes) await LoadData();
+        }
+
+        public virtual void OnUnload()
+        {
         }
 
         public Command LoadDataCommand { get; private set; }

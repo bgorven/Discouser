@@ -17,13 +17,16 @@ namespace Discouser.ViewModel
             _context = context;
         }
 
-        public override async Task NotifyChanges(Model.Site model) { await Task.FromResult(0); }
-
-        public override async Task LoadData()
+        public override async Task Initialize()
         {
             await _context.Initialize();
-            _categories = new ObservableCollection<Category>((await _context.AllCategories()).Select(model => new Category(model, _context)));
-            RaisePropertyChanged("Categories");
+        }
+
+        public override async Task NotifyChanges(Model.Site model)
+        {
+            _categories = new ObservableCollection<Category>((await _context.AllCategories()).Select(category => new Category(category, _context)));
+            _changedProperties = new string[] { "Categories" };
+            Changes = true;
         }
 
         private ObservableCollection<Category> _categories;

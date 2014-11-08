@@ -50,12 +50,24 @@ namespace Discouser.Data
             return new Session() { Username = (string)result };
         }
 
-        private static readonly string[] _categoriesPath = new string[] { "category_list", "categories" };
-        internal async Task<IEnumerable<Category>> GetCategories()
+        private static readonly string[] _categoriesPath = new string[] { "site", "categories" };
+        internal async Task<IEnumerable<Category>> GetAllCategories()
         {
-            var result = await Get("categories", _categoriesPath);
+            var result = await Get("site", _categoriesPath);
             if (result == null) return new Category[0];
-            return result.Select(c => new Category() { Id = (int)c["id"], Description = (string)c["description"], Name = (string)c["name"], Color = DecodeColor(c["color"]), TextColor = DecodeColor(c["text_color"]) });
+
+            var byId = result.ToDictionary(category => (int)category["id"]);
+
+            return result.Select(c => new Category() { 
+                Id = (int)c["id"], 
+                Description = (string)c["description"], 
+                Name = (string)c["name"], 
+                Color = DecodeColor(c["color"]), 
+                TextColor = DecodeColor(c["text_color"]),
+                Path = c["parent_category_id"] == null || c["parent_category_id"].Type != JTokenType.Integer ? 
+                    c["slug"] + "/none" : 
+                    byId[(int)c["parent_category_id"]]["slug"] + "/" + c["slug"]
+            });
         }
 
         private string DecodeColor(JToken jToken)
@@ -227,6 +239,21 @@ namespace Discouser.Data
                     ReplyPostId = id,
                     OriginalPostId = (int)result["reply_to_post_number"]
                 });
+        }
+
+        private static readonly string[] _categoryTopicsPath = new string[] { "topic_list" };
+        internal async Task<Tuple<IEnumerable<Model.Topic>, bool>> GetCategoryPage(string path, int pageToGet)
+        {
+            var result = await Get("c/" + path, _categoryTopicsPath) as JObject;
+            if (result == null) return new Tuple<IEnumerable<Model.Topic>, bool>(new Topic[0], false);
+            var morePages = result["more_topics_url"] != null && result["more_topics_url"].Type != JTokenType.Null;
+
+            return new Tuple<IEnumerable<Topic>, bool>(result["topics"].Select(topic => new Topic() {
+                Id = (int)topic["id"],
+                CategoryId = (int)topic["category_id"],
+                Name = (string)topic["title"],
+                Activity = (DateTime)topic["bumped_at"]
+            }), morePages);
         }
     }
 }
