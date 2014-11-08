@@ -88,7 +88,7 @@ namespace Discouser.Data
 
         public async Task DbTransaction(Action<SQLiteConnection> action)
         {
-            await DbTransaction(action);
+            await _db.RunInTransactionAsync(action);
         }
 
         public async Task<IEnumerable<Category>> AllCategories()

@@ -35,24 +35,26 @@ namespace Discouser.Data
             _client.Dispose();
         }
 
+        private static readonly string[] _jsonRoot = new string[0];
         internal async Task PostSession(string login, string password)
         {
-            await Post("session", Utility.KeyValuePair("login", login), Utility.KeyValuePair("password", password));
+            await Post("session", _jsonRoot, Utility.KeyValuePair("login", login), Utility.KeyValuePair("password", password));
         }
 
+        private static readonly string[] _sessionUserPath = new string[] { "current_user", "username" };
         internal async Task<Session> GetSessionCurrent()
         {
-            var result = await Get("session/current");
+            var result = await Get("session/current", _sessionUserPath);
             if (result == null) return null;
-            return new Session() { Username = (string)result["current_user"]["username"] };
+            return new Session() { Username = (string)result };
         }
 
+        private static readonly string[] _categoriesPath = new string[] { "category_list", "categories" };
         internal async Task<IEnumerable<Category>> GetCategories()
         {
-            var result = await Get("categories");
+            var result = await Get("categories", _categoriesPath);
             if (result == null) return new Category[0];
-            IEnumerable<JToken> categories = result["category_list"]["categories"];
-            return categories.Select(c => new Category() { Id = (int)c["id"], Description = (string)c["description"], Name = (string)c["name"], Color = DecodeColor(c["color"]), TextColor = DecodeColor(c["text_color"]) });
+            return result.Select(c => new Category() { Id = (int)c["id"], Description = (string)c["description"], Name = (string)c["name"], Color = DecodeColor(c["color"]), TextColor = DecodeColor(c["text_color"]) });
         }
 
         private string DecodeColor(JToken jToken)
@@ -73,7 +75,7 @@ namespace Discouser.Data
 
         internal async Task<IEnumerable<Message>> Poll(IEnumerable<KeyValuePair<string,string>> channels)
         {
-            var result = await Post("message-bus/" + _guid + "/poll", channels.ToArray());
+            var result = await Post("message-bus/" + _guid + "/poll", _jsonRoot, channels.ToArray());
             if (result == null) return new Message[0];
             return result.Select(Message.Decode);
         }
@@ -86,14 +88,14 @@ namespace Discouser.Data
 
             topic.LatestMessage = -1;
             var channel = Utility.KeyValuePair(topicChannelString, "-1");
-            var pollResult = await Post("message-bus/" + _guid + "/poll?dlp=t", new KeyValuePair<string, string>[] { channel });
+            var pollResult = await Post("message-bus/" + _guid + "/poll?dlp=t", _jsonRoot, new KeyValuePair<string, string>[] { channel });
             if (pollResult != null)
             {
                 var message = Message.Decode(pollResult.First()) as StatusMessage;
                 if (message != null) topic.LatestMessage = message.Statuses.Where(status => status.Key == topicChannelString).First().Value;
             }
 
-            var result = await Get(topicString);
+            var result = await Get(topicString, _jsonRoot);
             if (result == null) return null;
 
             topic.Activity = (DateTime)result["last_posted_at"];
@@ -132,14 +134,14 @@ namespace Discouser.Data
             posts[post.PostNumberInTopic] = post;
         }
 
+        private static readonly string[] _postStreamPath = new string[] { "post_stream", "posts" };
         private async Task<IEnumerable<JToken>> GetRawPostStream(string topicString, IEnumerable<int> stream)
         {
             var streamParameters = stream.Select(id => Utility.KeyValuePair("post_ids[]", id.ToString())).ToList();
             streamParameters.Add(Utility.KeyValuePair("_", "wtf"));
-            var result = await Get(topicString + "/posts", streamParameters.ToArray());
-
+            var result = await Get(topicString + "/posts", _postStreamPath, streamParameters.ToArray());
             if (result == null) return new JToken[0];
-            else return result["post_stream"]["posts"];
+            else return result;
         }
 
         private static Post DecodePost(JToken post)
@@ -186,7 +188,7 @@ namespace Discouser.Data
 
         internal async Task<IEnumerable<Like>> GetLikes(int id)
         {
-            IEnumerable<JToken> result = await Get("post_actions/users",
+            IEnumerable<JToken> result = await Get("post_actions/users", _jsonRoot,
                 Utility.KeyValuePair("id", id.ToString()), 
                 Utility.KeyValuePair("post_action_type_id", PostActionTypes.Like.ToString()), 
                 Utility.KeyValuePair("_", "wtf"));
@@ -199,7 +201,7 @@ namespace Discouser.Data
         /// </summary>
         internal async Task<Tuple<User,Post,Reply>> GetPost(int id)
         {
-            var result = await Get("posts/" + id);
+            var result = await Get("posts/" + id, _jsonRoot);
             if (result == null) return null;
             return Tuple.Create(
                 new User()

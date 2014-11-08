@@ -69,7 +69,7 @@ namespace Discouser.ViewModel
 
                 if (!NewSiteLoading) return;
                 NewSiteLoading = false;
-                if (loggedInUser == username)
+                if (loggedInUser.Equals(username, StringComparison.OrdinalIgnoreCase))
                 {
                     await siteToAdd.Context.Initialize();
                     await siteToAdd.LoadData();
@@ -93,7 +93,8 @@ namespace Discouser.ViewModel
         private void AddSite(Site siteToAdd)
         {
             foreach (var siteToRemove in Sites
-                .Where(site => site.Url == siteToAdd.Url && site.Username == siteToAdd.Username)
+                .Where(site => site.Url.Equals(siteToAdd.Url, StringComparison.OrdinalIgnoreCase)
+                    && site.Username.Equals(siteToAdd.Username, StringComparison.OrdinalIgnoreCase))
                 .ToList())
             {
                 RemoveSite(siteToRemove);

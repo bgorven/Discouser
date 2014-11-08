@@ -151,19 +151,14 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.5\lib\netcore45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Discouser\" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="Microsoft.VCLibs, version=12.0">
       <Name>Microsoft Visual C++ 2013 Runtime Package for Windows</Name>
     </SDKReference>
-    <SDKReference Include="SQLite.WinRT81, Version=3.8.7">
-      <Name>SQLite for Windows Runtime %28Windows 8.1%29</Name>
+    <SDKReference Include="SQLite.WinRT81, Version=3.8.7.1">
+      <Name>SQLite for Windows Runtime %28Windows 8.1%291</Name>
     </SDKReference>
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +167,12 @@
     <DesignData Include="SampleData\PostSampleData.xaml" />
     <DesignData Include="SampleData\SiteSampleData.xaml" />
     <DesignData Include="SampleData\TopicSampleData.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.6\lib\netcore45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

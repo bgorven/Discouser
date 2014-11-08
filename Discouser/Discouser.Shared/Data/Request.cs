@@ -14,27 +14,33 @@ namespace Discouser.Data
 
     public partial class ApiConnection
     {
-
-        public Task<JToken> Get(string path, params KeyValuePair<string, string>[] parameters)
+        public Task<JToken> Get(string path, string[] jsonPath, params KeyValuePair<string, string>[] parameters)
         {
-            return Request(path, HttpMethod.Get, parameters);
+            return Request(path, HttpMethod.Get, parameters, jsonPath);
         }
 
-        public Task<JToken> Post(string path, params KeyValuePair<string, string>[] parameters)
+        public Task<JToken> Post(string path, string[] jsonPath, params KeyValuePair<string, string>[] parameters)
         {
-            return Request(path, HttpMethod.Post, parameters);
+            return Request(path, HttpMethod.Post, parameters, jsonPath);
         }
 
-        private async Task<JToken> Request(string path, HttpMethod method, IEnumerable<KeyValuePair<string, string>> parameters)
+        private async Task<JToken> Request(string relativePath, 
+            HttpMethod method, 
+            IEnumerable<KeyValuePair<string, string>> parameters,
+            string[] jsonPath)
         {
+            var request = BuildRequest(_host, relativePath, method, parameters);
+
             try
             {
-                var result = await _client.SendRequestAsync(BuildRequest(_host, path, method, parameters));
+                var result = await _client.SendRequestAsync(request);
 
                 if (!result.IsSuccessStatusCode && (await result.Content.ReadAsStringAsync()) == "['BAD CSRF']")
                 {
                     _client.DefaultRequestHeaders.Append("X-CSRF-Token", await GetCsrfToken());
-                    result = await _client.SendRequestAsync(BuildRequest(_host, path, method, parameters));
+
+                    request = BuildRequest(_host, relativePath, method, parameters);
+                    result = await _client.SendRequestAsync(request);
                 }
                 if (!result.IsSuccessStatusCode)
                 {
@@ -42,38 +48,65 @@ namespace Discouser.Data
                     return null;
                 }
 
-                return await Deserialize(result);
+                return await Deserialize(result, jsonPath);
             }
             catch (Exception é)
             {
-                await _logger.Log(é, "HttpRequest to " + path + "failed.");
+                var task = _logger.Log(é, "HttpRequest to " + relativePath + "failed.");
                 return null;
             }
         }
 
+        private static readonly string[] _csrfPath = new string[] { "csrf" };
         private async Task<string> GetCsrfToken()
         {
             var uriString = _host + "/session/csrf.json";
             var csrfSource = new Uri(uriString);
             var csrfResult = _client.GetAsync(csrfSource);
-            var csrfToken = (await Deserialize(await csrfResult))["csrf"].ToString();
+            var csrfToken = (string)await Deserialize(await csrfResult, _csrfPath);
             return csrfToken;
         }
 
-        private async Task<JToken> Deserialize(HttpResponseMessage result)
+        private async Task<JToken> Deserialize(HttpResponseMessage message, string[] path)
         {
+            path = path ?? new string[0];
 
-            using (var inputStream = await result.Content.ReadAsInputStreamAsync())
+            using (var inputStream = await message.Content.ReadAsInputStreamAsync())
             using (var streamReader = new StreamReader(inputStream.AsStreamForRead()))
-            using (var jsonTextReader = new JsonTextReader(streamReader))
+            using (var reader = new JsonTextReader(streamReader))
             {
                 try
                 {
-                    return JToken.ReadFrom(jsonTextReader);
+                    if (!reader.Read()) throw new ArgumentException("Response missing any JSON data", "result");
+                    if (reader.TokenType != JsonToken.StartObject) throw new InvalidDataException("Can only browse JSON objects.");
+                    
+                    for (var index = 0; index < path.Length; index++)
+                    {
+
+                        //when this loop ends, the start of the desired object will be the current token in the reader.
+                        while (true)
+                        {
+                            if (!reader.Read()) throw new InvalidDataException("Malformed JSON data.");
+                            if (reader.TokenType != JsonToken.PropertyName) throw new InvalidDataException(
+                                "Property “" + string.Join(".", path, 0, index + 1) + "” not found.");
+
+                            if (path[index].Equals(reader.Value))
+                            {
+                                reader.Read();
+                                break;
+                            }
+                            else
+                            {
+                                reader.Skip();
+                            }
+                        }
+                    }
+
+                    return JToken.ReadFrom(reader);
                 }
                 catch (Exception é)
                 {
-                    await _logger.Log(é, "Deserialize failed.");
+                    var task = _logger.Log(é, "Deserialize failed.");
                     return null;
                 }
             }
@@ -81,12 +114,12 @@ namespace Discouser.Data
 
         private static HttpRequestMessage BuildRequest(string host, string path, HttpMethod method, IEnumerable<KeyValuePair<string, string>> parameters)
         {
-            var sendContent = !(method == HttpMethod.Put || method == HttpMethod.Post || method == HttpMethod.Patch);
+            var sendContent = method == HttpMethod.Put || method == HttpMethod.Post || method == HttpMethod.Patch;
+            path = (path.StartsWith("/") ? "" : "/") + path + (path.EndsWith("/") ? "" : "/");
             
             var query = "?";
             if (!sendContent)
             {
-                path = (path.StartsWith("/") ? "" : "/") + path + (path.EndsWith("/") ? "" : "/");
                 foreach (var kv in parameters)
                 {
                     query += Uri.EscapeDataString(kv.Key) + "=" + Uri.EscapeDataString(kv.Value) + "&";
