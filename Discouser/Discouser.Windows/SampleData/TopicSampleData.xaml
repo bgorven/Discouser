@@ -1,4 +1,4 @@
-﻿<ViewModel:Topic xmlns:ViewModel="using:Discouser.ViewModel" Activity="10/23/2014 01:55:33" Changes="True" Id="19" LatestMessage="92" Name="Class aenean">
+﻿<ViewModel:Topic xmlns:ViewModel="using:Discouser.ViewModel" Activity="10/23/2014 01:55:33" Initialized="True" Changes="True" Id="19" LatestMessage="92" Name="Class aenean">
 	<ViewModel:Topic.Posts>
 		<ViewModel:Post Changes="True" Created="10/23/2014 01:55:33" Html="Maecenas vestibulum" LikeCount="26" ReplyCount="42" Text="Etiam convallis hac leo">
 			<ViewModel:Post.Likes>

@@ -18,7 +18,6 @@ namespace Discouser.ViewModel
             _context = context;
             _model = model;
             LoadDataCommand = new Command(() => this.Changes, LoadData);
-            if (context == null && model == null) Initialized = true;
         }
 
         internal async Task<TModel> LoadModel()

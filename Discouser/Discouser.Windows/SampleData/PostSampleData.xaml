@@ -1,4 +1,4 @@
-﻿<ViewModel:Post xmlns:ViewModel="using:Discouser.ViewModel" Changes="False" Created="10/23/2014 01:55:44" Html="Vestibulum accumsan" LikeCount="35" ReplyCount="40" Text="Leo aliquam mus">
+﻿<ViewModel:Post xmlns:ViewModel="using:Discouser.ViewModel" Initialized="True" Changes="False" Created="10/23/2014 01:55:44" Html="Vestibulum accumsan" LikeCount="35" ReplyCount="40" Text="Leo aliquam mus">
 	<ViewModel:Post.Likes>
 		<ViewModel:User AvatarId="30" Bio="Adipiscing auctor eleifend" Changes="False" DisplayName="Bibendum adipiscing curae integer quisque" Location="Aptent vestibulum" Site="Vestibulum etiam dictumst" Title="Parturient fermentum vivamus nec donec" Username="Facilisis class amet"/>
 		<ViewModel:User AvatarId="53" Bio="Sem faucibus" Changes="True" DisplayName="Non aliquam" Location="Facilisi sed himenaeos lectus aliquet" Site="Imperdiet fusce lorem ante libero" Title="Cursus per hendrerit dictum" Username="Fringilla congue habitasse"/>

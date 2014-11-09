@@ -1,4 +1,4 @@
-﻿<ViewModel:Site xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser" xmlns:Data="using:Discouser.Data" xmlns:Storage="using:Windows.Storage" xmlns:System="using:System" xmlns:FileProperties="using:Windows.Storage.FileProperties" Logo="Ultricies sociis sit vestibulum taciti" SiteName="Nunc dictumst vestibulum fames" Url="http://www.adatum.com/" Username="Tristique pretium bibendum">
+﻿<ViewModel:Site xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser" xmlns:Data="using:Discouser.Data" xmlns:Storage="using:Windows.Storage" xmlns:System="using:System" xmlns:FileProperties="using:Windows.Storage.FileProperties" Initialized="True" Logo="Ultricies sociis sit vestibulum taciti" SiteName="Nunc dictumst vestibulum fames" Url="http://www.adatum.com/" Username="Tristique pretium bibendum">
 	<ViewModel:Site.Context>
 		<Data:DataContext SiteName="Iaculis lacinia hendrerit" Username="Erat habitasse volutpat eros nibh">
 			<Data:DataContext.StorageDir>

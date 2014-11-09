@@ -1,4 +1,4 @@
-﻿<ViewModel:AllSites xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser" xmlns:Data="using:Discouser.Data" xmlns:Storage="using:Windows.Storage" NewSitePassword="Blandit ante" NewSiteLoading="False" NewSiteUrl="Congue cursus inceptos curabitur arcu" NewSiteUsername="Amet nam aliquet" NewSiteFailedToAuthorize="True" NewSiteViewVisible="True">
+﻿<ViewModel:AllSites xmlns:ViewModel="using:Discouser.ViewModel" xmlns:Discouser="using:Discouser" xmlns:Data="using:Discouser.Data" xmlns:Storage="using:Windows.Storage" Initialized="True" NewSitePassword="Blandit ante" NewSiteLoading="False" NewSiteUrl="Congue cursus inceptos curabitur arcu" NewSiteUsername="Amet nam aliquet" NewSiteFailedToAuthorize="True" NewSiteViewVisible="True">
 	<ViewModel:AllSites.NewSiteCancelAddCommand>
 		<Discouser:Command/>
 	</ViewModel:AllSites.NewSiteCancelAddCommand>
