@@ -116,7 +116,7 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-		<Grid Grid.Column="1" d:DataContext="{d:DesignData /SampleData/CategorySampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Categories}" >
+		<Grid Name="CategoryGrid" Grid.Column="1" d:DataContext="{d:DesignData /SampleData/CategorySampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Categories}" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="1*"/>
@@ -147,8 +147,21 @@
 					</DataTemplate>
 				</ListView.ItemTemplate>
 			</ListView>
-            <Grid Grid.Row="2" d:DataContext="{d:DesignData /SampleData/TopicSampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Topics}" >
-                <ListView Name="Posts" ItemsSource="{Binding Posts}" Visibility="{Binding Initialized, Converter={StaticResource VisiblityConverter}}">
+            <Grid Name="TopicGrid" Grid.Row="2" d:DataContext="{d:DesignData /SampleData/TopicSampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Topics}" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Name="BackButton" Grid.Row="0" Grid.Column="0" Click="BackButton_Click" Visibility="Collapsed">
+                    <Image Source="Images/back.png" Width="32" Height="32"/>
+                </Button>
+                <TextBlock Name="TopicTitle" Text="{Binding Name}" Grid.Row="0" Grid.Column="1" FontSize="24" Margin="10" Visibility="Collapsed"/>
+                <ListView Grid.Column="1" Grid.Row="1" Name="Posts" ItemsSource="{Binding Posts}" DoubleTapped="Posts_DoubleTapped"
+                          Visibility="{Binding Initialized, Converter={StaticResource VisiblityConverter}}">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel />
