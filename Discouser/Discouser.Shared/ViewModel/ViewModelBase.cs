@@ -18,6 +18,7 @@ namespace Discouser.ViewModel
             _context = context;
             _model = model;
             LoadDataCommand = new Command(() => this.Changes, LoadData);
+            if (context == null && model == null) Initialized = true;
         }
 
         internal async Task<TModel> LoadModel()
@@ -51,6 +52,17 @@ namespace Discouser.ViewModel
             }
         }
 
+        private bool _initialized = false;
+        public bool Initialized
+        {
+            get { return _initialized; }
+            set
+            {
+                _initialized = value;
+                RaisePropertyChanged("Initialized");
+            }
+        }
+
         /// <summary>
         /// <para>Called by the UI when the user is ready to see the changed data.</para>
         /// <para>Raises property changed events for all properties changed by <code>NotifyChanges</code>, and clears 
@@ -68,6 +80,7 @@ namespace Discouser.ViewModel
             await Initialize();
             await NotifyChanges();
             if (Changes) await LoadData();
+            Initialized = true;
         }
 
         public virtual void OnUnload()

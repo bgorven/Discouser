@@ -99,7 +99,7 @@
 			<ColumnDefinition />
 		</Grid.ColumnDefinitions>
         
-		<ListView ItemsSource="{Binding Categories}" x:Name="AllCategories" CanReorderItems="True" SelectionMode="Single">
+		<ListView ItemsSource="{Binding Categories}" x:Name="Categories" CanReorderItems="True" SelectionMode="Single">
 			<ListView.ItemsPanel>
 				<ItemsPanelTemplate>
 					<StackPanel />
@@ -107,33 +107,35 @@
 			</ListView.ItemsPanel>
 			<ListView.ItemTemplate>
 				<DataTemplate>
-					<Canvas Width="38" Height="38" >
-						<Canvas.Background>
+					<Grid>
+						<Grid.Background>
 							<SolidColorBrush Color="{Binding Color}" />
-						</Canvas.Background>
-						<Button  Width="38" Height="38" BorderThickness="0"
-							Command="{Binding LoadDataCommand}" 
-							ToolTipService.ToolTip="{Binding Name}" />
-						<Image Source="Images/refresh.png" Width="38" Height="38"
-							Visibility="{Binding Changes, Converter={StaticResource VisiblityConverter}}"/>
-					</Canvas>
+						</Grid.Background>
+                        <TextBlock Text="{Binding Name}" Foreground="{Binding TextColor}" Margin="5"/>
+					</Grid>
 				</DataTemplate>
 			</ListView.ItemTemplate>
 		</ListView>
-		<StackPanel Grid.Column="1" d:DataContext="{d:DesignData /SampleData/CategorySampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=AllCategories}" >
+		<Grid Grid.Column="1" d:DataContext="{d:DesignData /SampleData/CategorySampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Categories}" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
             <Interactivity:Interaction.Behaviors>
                 <Core:EventTriggerBehavior EventName="DataContextChanged">
                     <Core:CallMethodAction MethodName="OnLoad" TargetObject="{Binding}"/>
                 </Core:EventTriggerBehavior>
             </Interactivity:Interaction.Behaviors>
-            <StackPanel>
+            <StackPanel Grid.Row="0">
 				<StackPanel.Background>
 					<SolidColorBrush Color="{Binding Color}" />
 				</StackPanel.Background>
-				<TextBlock Text="{Binding Name}" Foreground="{Binding TextColor}" />
-				<TextBlock Text="{Binding Description}" Foreground="{Binding TextColor}" />
-			</StackPanel>
-			<ListView ItemsSource="{Binding Topics}">
+				<TextBlock Margin="10" Text="{Binding Name}" Foreground="{Binding TextColor}" FontSize="24" />
+				<TextBlock Margin="10,0,10,10" Text="{Binding Description}" Foreground="{Binding TextColor}" FontSize="18" />
+            </StackPanel>
+            <ProgressRing Grid.Row="1" Width="60" Height="60" HorizontalAlignment="Left" IsActive="{Binding Initialized, Converter={StaticResource BooleanInverter}}" Visibility="{Binding Initialized, Converter={StaticResource InverseVisiblityConverter}}" />
+            <ListView Name="Topics" Grid.Row="1" ItemsSource="{Binding Topics}" Visibility="{Binding Initialized, Converter={StaticResource VisiblityConverter}}">
 				<ListView.ItemsPanel>
 					<ItemsPanelTemplate>
 						<VirtualizingStackPanel />
@@ -141,10 +143,24 @@
 				</ListView.ItemsPanel>
 				<ListView.ItemTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding Name}"/>
+						<TextBlock Margin="10" Text="{Binding Name}"/>
 					</DataTemplate>
 				</ListView.ItemTemplate>
 			</ListView>
-		</StackPanel>
+            <Grid Grid.Row="2" d:DataContext="{d:DesignData /SampleData/TopicSampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Topics}" >
+                <ListView Name="Posts" ItemsSource="{Binding Posts}" Visibility="{Binding Initialized, Converter={StaticResource VisiblityConverter}}">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="10" Text="{Binding Text}"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Grid>
 	</Grid>
 </Page>

@@ -44,7 +44,7 @@ namespace Discouser.ViewModel
 
             if (model.Name != _model.Name || model.Description != _model.Description || topicsChanged )
             {
-                _changedProperties = new string[] { topicsChanged ? "" : "Topics", model.Name == _model.Name ? "" : "Name", model.Description == _model.Description ? "" : "Description", };
+                _changedProperties = new string[] { topicsChanged ? "Topics" : "", model.Name == _model.Name ? "" : "Name", model.Description == _model.Description ? "" : "Description", };
                 Changes = true;
             }
         }
