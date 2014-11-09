@@ -22,6 +22,8 @@ namespace Discouser
             _action = action;
         }
 
+        protected Command() { }
+
         private Func<TParameter, Task> _action;
         private Func<TParameter, bool> _predicate;
 
@@ -50,12 +52,17 @@ namespace Discouser
         {
             if (CanExecute(parameter))
             {
-                await _action((TParameter)parameter);
+                await DoExecute((TParameter)parameter);
             }
+        }
+
+        public async virtual Task DoExecute(TParameter parameter)
+        {
+            await _action(parameter);
         }
     }
 
-    class Command : ICommand
+    class Command : Command<object>
     {
         /// <summary>
         /// Creates a command that executes unconditionally
@@ -99,8 +106,13 @@ namespace Discouser
         {
             if (CanExecute(null))
             {
-                await _action();
+                await DoExecute(null);
             }
+        }
+
+        public async override Task DoExecute(object parameter)
+        {
+            await _action();
         }
     }
 }

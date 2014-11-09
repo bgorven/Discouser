@@ -99,23 +99,23 @@
 			<ColumnDefinition />
 		</Grid.ColumnDefinitions>
         
-		<ListView ItemsSource="{Binding Categories}" x:Name="Categories" CanReorderItems="True" SelectionMode="Single">
-			<ListView.ItemsPanel>
-				<ItemsPanelTemplate>
-					<StackPanel />
-				</ItemsPanelTemplate>
-			</ListView.ItemsPanel>
+		<ListView ItemsSource="{Binding Categories}" x:Name="Categories" CanReorderItems="True" SelectionMode="Single" SelectionChanged="Categories_SelectionChanged">
 			<ListView.ItemTemplate>
-				<DataTemplate>
-					<Grid>
+                <DataTemplate>
+					<Grid Width="auto" HorizontalAlignment="Left">
 						<Grid.Background>
 							<SolidColorBrush Color="{Binding Color}" />
 						</Grid.Background>
-                        <TextBlock Text="{Binding Name}" Foreground="{Binding TextColor}" Margin="5"/>
+                        <TextBlock Text="{Binding Name}" Foreground="{Binding TextColor}" Margin="5" HorizontalAlignment="Right"/>
 					</Grid>
 				</DataTemplate>
-			</ListView.ItemTemplate>
-		</ListView>
+            </ListView.ItemTemplate>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Right" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
 		<Grid Grid.Column="1" d:DataContext="{d:DesignData /SampleData/CategorySampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Categories}" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>

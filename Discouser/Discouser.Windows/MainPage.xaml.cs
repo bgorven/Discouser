@@ -39,10 +39,9 @@ namespace Discouser
         {
             if (e.Key == Windows.System.VirtualKey.Enter)
             {
-                NewSiteAddButton.Command.Execute(null);
+                var addSiteCommand = NewSiteAddButton.Command as Command;
+                if (addSiteCommand != null && addSiteCommand.CanExecute(null)) await addSiteCommand.DoExecute(null);
                 NewSiteCancelAddButton.Focus(FocusState.Programmatic);
-                await Task.FromResult("This method is marked as async because the button command may be async." +
-                                      "Not sure if that's necessary, but it seemed slightly safer.");
             }
         }
     }
