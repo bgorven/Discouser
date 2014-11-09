@@ -99,7 +99,7 @@
 			<ColumnDefinition />
 		</Grid.ColumnDefinitions>
         
-		<ListView ItemsSource="{Binding Categories}" x:Name="Categories" CanReorderItems="True" SelectionMode="Single" SelectionChanged="Categories_SelectionChanged">
+		<ListView ItemsSource="{Binding Categories}" x:Name="Categories" CanReorderItems="True" SelectionMode="Single">
 			<ListView.ItemTemplate>
                 <DataTemplate>
 					<Grid Width="auto" HorizontalAlignment="Left">
