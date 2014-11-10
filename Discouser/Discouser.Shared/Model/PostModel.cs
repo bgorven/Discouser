@@ -20,9 +20,9 @@ namespace Discouser.Model
         [NotNull]
         public DateTime Created { get; set; }
 
-        public string RawText { get; set; }
+        public string Text { get; set; }
 
-        public string HtmlText { get; set; }
+        public string Html { get; set; }
 
         public bool Deleted { get; set; }
     }

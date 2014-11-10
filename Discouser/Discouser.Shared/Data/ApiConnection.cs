@@ -29,6 +29,8 @@ namespace Discouser.Data
             _client.DefaultRequestHeaders.UserAgent.ParseAdd("Buddy");
             _client.DefaultRequestHeaders.Append("X-Requested-With", "XMLHttpRequest");
             _client.DefaultRequestHeaders.Append("X-SILENCE-LOGGER", "true");
+            _client.DefaultRequestHeaders.Accept.ParseAdd("*/*");
+            _client.DefaultRequestHeaders.Referer = new Uri(_host);
     }
 
         public void Dispose()
@@ -130,57 +132,102 @@ namespace Discouser.Data
             return new Tuple<IEnumerable<User>, IEnumerable<Post>, Topic>(users.Values, posts.Values, topic);
         }
 
-        private static void DecodePostToken(JToken token, Dictionary<int, Post> posts, Dictionary<int, User> users, List<Reply> replies)
+        private void DecodePostToken(JToken token, Dictionary<int, Post> posts, Dictionary<int, User> users, List<Reply> replies)
         {
-            var user = ExtractUserFromPost(token);
-            users[user.Id] = user;
-            if (token["reply_to_post_number"] != null)
+            try
             {
-                var reply = new Reply()
+                var user = ExtractUserFromPost(token);
+                if (user != null) users[user.Id] = user;
+
+                var post = DecodePost(token);
+
+                if (token["raw"] == null)
                 {
-                    OriginalPostId = posts[(int)token["reply_to_post_number"]].Id,
-                    ReplyPostId = (int)token["id"],
-                };
-                replies.Add(reply);
+                    ;
+                } 
+
+                if (post != null)
+                {
+                    posts[post.PostNumberInTopic] = post;
+
+                    if (token["reply_to_post_number"] != null && token["reply_to_post_number"].Type == JTokenType.Integer)
+                    {
+                        var reply = new Reply()
+                        {
+                            OriginalPostId = posts[(int)token["reply_to_post_number"]].Id,
+                            ReplyPostId = (int)token["id"],
+                        };
+                        replies.Add(reply);
+                    }
+                }
             }
-            var post = DecodePost(token);
-            posts[post.PostNumberInTopic] = post;
+            catch (Exception é)
+            {
+                var task = _logger.Log(é);
+            }
         }
 
+        private const int POSTS_PER_REQUEST = 150;
         private static readonly string[] _postStreamPath = new string[] { "post_stream", "posts" };
-        private async Task<IEnumerable<JToken>> GetRawPostStream(string topicString, IEnumerable<int> stream)
+        private async Task<IEnumerable<JToken>> GetRawPostStream(string topicString, IEnumerable<int> _stream)
         {
-            var streamParameters = stream.Select(id => Utility.KeyValuePair("post_ids[]", id.ToString())).ToList();
-            streamParameters.Add(Utility.KeyValuePair("_", "wtf"));
-            var result = await Get(topicString + "/posts", _postStreamPath, streamParameters.ToArray());
-            if (result == null) return new JToken[0];
-            else return result;
+            var requests = _stream.Split(POSTS_PER_REQUEST).Select(stream =>
+            {
+                var streamParameters = stream.Select(id => Utility.KeyValuePair("post_ids[]", id.ToString())).ToList();
+                streamParameters.Add(Utility.KeyValuePair("include_raw", "1"));
+                return Get(topicString + "/posts", _postStreamPath, streamParameters.ToArray());
+            }).ToList(); //ToList here to ensure all the requests get sent.
+
+            var results = new List<JToken>();
+            foreach (var request in requests)
+            {
+                var result = await request as JArray;
+                if (result != null) results.AddRange(result);
+            }
+            return results;
         }
 
-        private static Post DecodePost(JToken post)
+        private Post DecodePost(JToken post)
         {
-            return new Post()
+            try
             {
-                Created = (DateTime)post["created_at"],
-                Deleted = post["deleted_at"] != null,
-                HtmlText = (string)post["cooked"],
-                Id = (int)post["id"],
-                PostNumberInTopic = (int)post["post_number"],
-                TopicId = (int)post["topic_id"],
-                UserId = (int)post["user_id"],
-            };
+                return new Post()
+                {
+                    Created = (DateTime)post["created_at"],
+                    Deleted = post["deleted_at"] != null,
+                    Html = (string)post["cooked"],
+                    Text = (string)post["raw"],
+                    Id = (int)post["id"],
+                    PostNumberInTopic = (int)post["post_number"],
+                    TopicId = (int)post["topic_id"],
+                    UserId = (int)post["user_id"],
+                };
+            }
+            catch (Exception é)
+            {
+                var task = _logger.Log(é);
+                return null;
+            }
         }
 
-        private static User ExtractUserFromPost(JToken post)
+        private  User ExtractUserFromPost(JToken post)
         {
-            return new User()
+            try
             {
-                Id = (int)post["user_id"],
-                AvatarId = (int)post["uploaded_avatar_id"],
-                Username = (string)post["username"],
-                DisplayName = (string)post["name"],
-                Title = (string)post["user_title"],
-            };
+                return new User()
+                {
+                    Id = (int)post["user_id"],
+                    AvatarId = (int)post["uploaded_avatar_id"],
+                    Username = (string)post["username"],
+                    DisplayName = (string)post["name"],
+                    Title = (string)post["user_title"],
+                };
+            }
+            catch (Exception é)
+            {
+                var task = _logger.Log(é);
+                return null;
+            }
         }
 
 
@@ -229,8 +276,8 @@ namespace Discouser.Data
                 {
                     Id = id,
                     TopicId = (int)result["topic_id"],
-                    RawText = (string)result["raw"],
-                    HtmlText = (string)result["cooked"],
+                    Text = (string)result["raw"],
+                    Html = (string)result["cooked"],
                     UserId = (int)result["user_id"],
                     Created = (DateTime)result["created_at"],
                 },

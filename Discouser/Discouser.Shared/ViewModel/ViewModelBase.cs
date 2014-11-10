@@ -22,7 +22,7 @@ namespace Discouser.ViewModel
 
         internal async Task<TModel> LoadModel()
         {
-            return await _context.DbTransaction(db => db.Get<TModel>(_model.Id));
+            return await _context.Transaction(db => db.Get<TModel>(_model.Id));
         }
 
         public virtual Task Initialize() { return _nullTask; }
@@ -74,7 +74,12 @@ namespace Discouser.ViewModel
             return _nullTask;
         }
 
-        public virtual async void OnLoad()
+        public async void Loaded()
+        {
+            await OnLoad();
+        }
+
+        public virtual async Task OnLoad()
         {
             await Initialize();
             await NotifyChanges();
@@ -82,8 +87,14 @@ namespace Discouser.ViewModel
             Initialized = true;
         }
 
-        public virtual void OnUnload()
+        public async void Unloaded()
         {
+            await OnUnload();
+        }
+
+        public virtual Task OnUnload()
+        {
+            return _nullTask;
         }
 
         public Command LoadDataCommand { get; private set; }

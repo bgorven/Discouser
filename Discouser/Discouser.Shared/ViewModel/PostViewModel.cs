@@ -21,17 +21,17 @@ namespace Discouser.ViewModel
             model = model ?? await LoadModel();
             var changedProperties = new List<string>();
 
-            if (model.RawText != _model.RawText)
+            if (model.Text != _model.Text)
             {
                 changedProperties.Add("Text");
             }
 
-            if (model.HtmlText != _model.HtmlText)
+            if (model.Html != _model.Html)
             {
                 changedProperties.Add("Html");
             }
 
-            await _context.DbTransaction(Db =>
+            await _context.Transaction(Db =>
             {
                 if (Db.Table<Model.Reply>().Where(reply => reply.ReplyPostId == _model.Id).Count() != RepliesTo.Count)
                 {
@@ -78,9 +78,9 @@ namespace Discouser.ViewModel
             }
         }
 
-        public string Text { get { return _model.RawText; } }
+        public string Text { get { return _model.Text; } }
 
-        public string Html { get { return _model.HtmlText; } }
+        public string Html { get { return _model.Html; } }
 
         public int LikeCount { get { return Likes.Count; } }
 

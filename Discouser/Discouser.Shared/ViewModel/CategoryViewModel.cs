@@ -26,7 +26,7 @@ namespace Discouser.ViewModel
 
             var topicsChanged = false;
 
-            var topics = await _context.DbTransaction( db => db.Table<Model.Topic>()
+            var topics = await _context.Transaction( db => db.Table<Model.Topic>()
                 .Where(t => t.CategoryId == model.Id)
                 .OrderByDescending(t => t.Activity)
                 .ToList()

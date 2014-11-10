@@ -18,7 +18,7 @@ namespace Discouser.ViewModel
 
         private async Task<UserInfo> LoadInfo(int id)
         {
-            return await _context.DbTransaction(Db => Db.Get<UserInfo>(id));
+            return await _context.Transaction(Db => Db.Get<UserInfo>(id));
         }
 
         public string Username { get { return _model.Username; } }

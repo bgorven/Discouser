@@ -69,7 +69,7 @@ namespace Discouser.ViewModel
 
                 if (!NewSiteLoading) return;
                 NewSiteLoading = false;
-                if (loggedInUser.Equals(username, StringComparison.OrdinalIgnoreCase))
+                if (loggedInUser != null && loggedInUser.Equals(username, StringComparison.OrdinalIgnoreCase))
                 {
                     await siteToAdd.Initialize();
                     AddSite(siteToAdd);

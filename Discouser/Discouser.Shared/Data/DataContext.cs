@@ -73,7 +73,7 @@ namespace Discouser.Data
 
             _db = new SQLiteAsyncConnection(_dbString);
 
-            await DbTransaction(db =>
+            await Transaction(db =>
             {
                 db.CreateTable<Category>();
                 db.CreateTable<UserInfo>();
@@ -88,12 +88,12 @@ namespace Discouser.Data
             await InitializeSite();
         }
 
-        public async Task DbTransaction(Action<SQLiteConnection> action)
+        public async Task Transaction(Action<SQLiteConnection> action)
         {
             await _db.RunInTransactionAsync(action);
         }
 
-        public async Task<T> DbTransaction<T>(Func<SQLiteConnection,T> action)
+        public async Task<T> Transaction<T>(Func<SQLiteConnection,T> action)
         {
             T result = default(T);
             await _db.RunInTransactionAsync(db => result = action(db));
@@ -104,13 +104,13 @@ namespace Discouser.Data
         {
             var categories = await Api.GetAllCategories();
 
-            await DbTransaction(db => db.InsertAll(categories, "OR REPLACE"));
+            await Transaction(db => db.InsertAll(categories, "OR REPLACE"));
 
         }
 
         public async Task<IEnumerable<Category>> AllCategories()
         {
-            return await DbTransaction(db => db.Table<Category>().ToList());
+            return await Transaction(db => db.Table<Category>().ToList());
         }
 
         internal async Task InitializeCategory(Category category)
@@ -126,7 +126,7 @@ namespace Discouser.Data
                         while (await DownloadCategory(category, nextPage)) nextPage++;
 
                         category.Initialized = true;
-                        await DbTransaction(db => db.Update(category));
+                        await Transaction(db => db.Update(category));
                     }
                     catch (Exception é)
                     {
@@ -139,13 +139,13 @@ namespace Discouser.Data
         internal async Task<bool> DownloadCategory(Category category, int pageToGet)
         {
             var result = await Api.GetCategoryPage(category.Path, pageToGet);
-            await DbTransaction(db => db.InsertAll(result.Item1, "OR REPLACE"));
+            await Transaction(db => db.InsertAll(result.Item1, "OR REPLACE"));
             return result.Item2;
         }
 
         internal async Task LatestTopicMessage(int topicId, int messageId)
         {
-            await DbTransaction(db =>
+            await Transaction(db =>
             {
                 var topic = db.Get<Topic>(topicId);
                 if (topic != null)
@@ -158,7 +158,7 @@ namespace Discouser.Data
 
         internal async Task DeletePost(int postId)
         {
-            await DbTransaction(db =>
+            await Transaction(db =>
             {
                 var post = db.Get<Post>(postId);
                 if (post != null)
@@ -173,13 +173,13 @@ namespace Discouser.Data
         {
             var likes = await Api.GetLikes(id);
 
-            await DbTransaction(db => db.InsertAll(likes, "OR REPLACE"));
+            await Transaction(db => db.InsertAll(likes, "OR REPLACE"));
         }
 
         internal async Task DownloadPost(int id)
         {
             var post = await Api.GetPost(id);
-            await DbTransaction(db => db.InsertOrReplace(post));
+            await Transaction(db => db.InsertOrReplace(post));
         }
 
         public void Dispose()
@@ -189,6 +189,17 @@ namespace Discouser.Data
                 Api.Dispose();
                 Api = null;
             }
+        }
+
+        internal async Task DownloadTopic(Topic model)
+        {
+            var thread = await Api.DownloadEntireThread(model.Id);
+            await Transaction(db =>
+            {
+                db.InsertAll(thread.Item1, "OR REPLACE");
+                db.InsertAll(thread.Item2, "OR REPLACE");
+                db.Insert(thread.Item3, "OR REPLACE");
+            });
         }
     }
 }

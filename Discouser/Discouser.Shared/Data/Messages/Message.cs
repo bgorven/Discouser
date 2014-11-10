@@ -30,7 +30,7 @@ namespace Discouser.Data.Messages
                 var channel = (string)messageToDecode["channel"];
                 var id = (int)messageToDecode["message_id"];
 
-                if (channel == "__status")
+                if (channel == "/__status")
                 {
                     return StatusMessage.Decode(messageToDecode, id, channel);
                 }
@@ -40,12 +40,12 @@ namespace Discouser.Data.Messages
                 }
                 else
                 {
-                    return new ErrorMessage((string)messageToDecode);
+                    return new ErrorMessage(messageToDecode.ToString());
                 }
             }
             catch (Exception)
             {
-                return new ErrorMessage((string)messageToDecode);
+                return new ErrorMessage(messageToDecode.ToString());
             }
         }
     }

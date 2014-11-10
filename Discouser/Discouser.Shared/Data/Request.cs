@@ -48,6 +48,11 @@ namespace Discouser.Data
                     return null;
                 }
 
+                if (result.Content.Headers.ContentType.MediaType != "application/json")
+                {
+                    return null;
+                }
+                
                 return await Deserialize(result, jsonPath);
             }
             catch (Exception é)
@@ -78,7 +83,6 @@ namespace Discouser.Data
                 try
                 {
                     if (!reader.Read()) throw new ArgumentException("Response missing any JSON data", "result");
-                    if (reader.TokenType != JsonToken.StartObject) throw new InvalidDataException("Can only browse JSON objects.");
                     
                     for (var index = 0; index < path.Length; index++)
                     {
@@ -138,6 +142,7 @@ namespace Discouser.Data
                 }
                 else
                 {
+                    //path should end with '/' by this point.
                     path = path.Substring(0, path.Length - 1) + ".json";
                 }
             }

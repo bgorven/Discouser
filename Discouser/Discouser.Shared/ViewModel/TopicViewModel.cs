@@ -16,11 +16,16 @@ namespace Discouser.ViewModel
             _context = context;
         }
 
+        public override async Task Initialize()
+        {
+            await _context.DownloadTopic(_model);
+        }
+
         public override async Task NotifyChanges(Model.Topic model)
         {
             _model = model ?? await LoadModel();
 
-            var postList = await _context.DbTransaction(Db => Db.Table<Model.Post>()
+            var postList = await _context.Transaction(Db => Db.Table<Model.Post>()
                     .Where(t => t.TopicId == _model.Id)
                     .OrderByDescending(t => t.Created)
                     .ToList());
@@ -31,6 +36,8 @@ namespace Discouser.ViewModel
             }
 
             _changedProperties = new string[] { "Name", "CategoryId", "Activity", "Posts" };
+
+            Changes = true;
         }
 
         public int Id { get { return _model.Id; } }

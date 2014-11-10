@@ -27,14 +27,12 @@ namespace Discouser
         private Func<TParameter, Task> _action;
         private Func<TParameter, bool> _predicate;
 
-        public event EventHandler CanExecuteChanged;
-
         internal void Notify()
         {
             OnCanExecuteChanged();
         }
 
-        protected virtual void OnCanExecuteChanged()
+        protected void OnCanExecuteChanged()
         {
             var handler = CanExecuteChanged;
             if (handler != null)
@@ -43,12 +41,14 @@ namespace Discouser
             }
         }
 
-        public bool CanExecute(object parameter)
+        public event EventHandler CanExecuteChanged;
+
+        public virtual bool CanExecute(object parameter)
         {
             return parameter is TParameter && _predicate((TParameter)parameter);
         }
 
-        public async void Execute(object parameter)
+        public async virtual void Execute(object parameter)
         {
             if (CanExecute(parameter))
             {
@@ -81,28 +81,12 @@ namespace Discouser
         private Func<Task> _action;
         private Func<bool> _predicate;
 
-        public event EventHandler CanExecuteChanged;
-
-        internal void Notify()
-        {
-            OnCanExecuteChanged();
-        }
-
-        protected virtual void OnCanExecuteChanged()
-        {
-            var handler = CanExecuteChanged;
-            if (handler != null)
-            {
-                handler(this, EventArgs.Empty);
-            }
-        }
-
-        public bool CanExecute(object parameter)
+        public override bool CanExecute(object parameter)
         {
             return _predicate();
         }
 
-        public async void Execute(object parameter)
+        public async override void Execute(object parameter)
         {
             if (CanExecute(null))
             {

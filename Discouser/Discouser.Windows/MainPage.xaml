@@ -38,7 +38,7 @@
                             <Canvas Width="244" Height="66">
                                 <Interactivity:Interaction.Behaviors>
                                     <Core:EventTriggerBehavior EventName="Loaded">
-                                        <Core:CallMethodAction MethodName="OnLoad" TargetObject="{Binding}"/>
+                                        <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
                                     </Core:EventTriggerBehavior>
                                 </Interactivity:Interaction.Behaviors>
                                 <Canvas.Background>
@@ -124,7 +124,7 @@
             </Grid.RowDefinitions>
             <Interactivity:Interaction.Behaviors>
                 <Core:EventTriggerBehavior EventName="DataContextChanged">
-                    <Core:CallMethodAction MethodName="OnLoad" TargetObject="{Binding}"/>
+                    <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
                 </Core:EventTriggerBehavior>
             </Interactivity:Interaction.Behaviors>
             <StackPanel Grid.Row="0">
@@ -147,7 +147,8 @@
 					</DataTemplate>
 				</ListView.ItemTemplate>
 			</ListView>
-            <Grid Name="TopicGrid" Grid.Row="2" d:DataContext="{d:DesignData /SampleData/TopicSampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Topics}" >
+            <Grid Name="TopicGrid" Grid.Row="2" DataContextChanged="TopicGrid_DataContextChanged"
+                  d:DataContext="{d:DesignData /SampleData/TopicSampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Topics}" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
                     <RowDefinition />
