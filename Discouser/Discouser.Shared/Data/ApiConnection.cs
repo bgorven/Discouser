@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Web.Http;
 
@@ -95,41 +96,104 @@ namespace Discouser.Data
             return result.Select(Message.Decode);
         }
 
-        internal async Task<Tuple<IEnumerable<User>, IEnumerable<Post>, Topic>> DownloadEntireThread(int id)
+        internal class TopicResult
         {
-            var topic = new Topic();
-            string topicChannelString = "/topic/" + id;
-            string topicString = "/t/" + id;
+            internal TopicResult(Topic topic, Dictionary<int, Model.Post> posts, Dictionary<int, User> users, List<Reply> replies)
+            {
+                Posts = posts.Values;
+                Replies = replies;
+                Users = users.Values;
+                Topic = topic;
+            }
 
+            internal IEnumerable<Post> Posts;
+            internal IEnumerable<Reply> Replies;
+            internal IEnumerable<User> Users;
+            internal Topic Topic;
+        }
+
+        private static string ChannelString(Topic topic)
+        {
+            return "/topic/" + topic.Id;
+        }
+
+        private static string RequestString(Topic topic)
+        {
+            return "/t/" + topic.Id;
+        }
+
+        internal async Task<Tuple<int[], TopicResult>> DownloadTopicInitial(Topic topic)
+        {
             topic.LatestMessage = -1;
-            var channel = Utility.KeyValuePair(topicChannelString, "-1");
+
+            var channel = Utility.KeyValuePair(ChannelString(topic), "-1");
             var pollResult = await Post("message-bus/" + _guid + "/poll?dlp=t", _jsonRoot, new KeyValuePair<string, string>[] { channel });
             if (pollResult != null)
             {
                 var message = Message.Decode(pollResult.First()) as StatusMessage;
-                if (message != null) topic.LatestMessage = message.Statuses.Where(status => status.Key == topicChannelString).First().Value;
+                if (message != null) topic.LatestMessage = message.Statuses.Where(status => status.Key == ChannelString(topic)).First().Value;
             }
 
-            var result = await Get(topicString, _jsonRoot);
+            var result = await Get(RequestString(topic), _jsonRoot, Utility.KeyValuePair("include_raw", "1"));
             if (result == null) return null;
 
             topic.Activity = (DateTime)result["last_posted_at"];
             topic.CategoryId = (int)result["category_id"];
-            topic.Id = (int)result["id"];
             topic.Name = (string)result["title"];
+
+            var poststream = result["post_stream"]["posts"];
+            var stream = result["post_stream"]["stream"].Select(value => (int)value).ToArray();
 
             var posts = new Dictionary<int, Post>();
             var users = new Dictionary<int, User>();
             var replies = new List<Reply>();
-            var poststream = result["post_stream"]["posts"];
-            var stream = result["post_stream"]["stream"].Select(value => (int)value);
 
-            foreach (var token in await GetRawPostStream(topicString, stream))
+            foreach (var token in poststream)
             {
                 DecodePostToken(token, posts, users, replies);
             }
 
-            return new Tuple<IEnumerable<User>, IEnumerable<Post>, Topic>(users.Values, posts.Values, topic);
+            return Tuple.Create(stream, new TopicResult(topic, posts, users, replies));
+        }
+
+        internal async Task<TopicResult> DownloadTopicStream(Topic topic, IEnumerable<int> stream, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var posts = new Dictionary<int, Post>();
+            var users = new Dictionary<int, User>();
+            var replies = new List<Reply>();
+
+            foreach (var task in GetRawPostStream(RequestString(topic), stream))
+            {
+                var jarray = await task as JArray;
+                if (jarray != null)
+                {
+                    foreach (var token in jarray)
+                    {
+                        DecodePostToken(token, posts, users, replies);
+                    }
+                }
+                else
+                {
+                    topic.LatestMessage = -1;
+                }
+            }
+
+            return new TopicResult(topic, posts, users, replies);
+        }
+
+        private const int POSTS_PER_REQUEST = 150;
+        private static readonly string[] _postStreamPath = new string[] { "post_stream", "posts" };
+        private IEnumerable<Task<JToken>> GetRawPostStream(string topicString, IEnumerable<int> _stream)
+        {
+            return _stream.Split(POSTS_PER_REQUEST).Select(stream =>
+            {
+                var streamParameters = stream.Select(id => Utility.KeyValuePair("post_ids[]", id.ToString())).ToList();
+                streamParameters.Add(Utility.KeyValuePair("include_raw", "1"));
+
+                return Get(topicString + "/posts", _postStreamPath, streamParameters.ToArray());
+            });
         }
 
         private void DecodePostToken(JToken token, Dictionary<int, Post> posts, Dictionary<int, User> users, List<Reply> replies)
@@ -163,28 +227,8 @@ namespace Discouser.Data
             }
             catch (Exception é)
             {
-                var task = _logger.Log(é);
+                _logger.Log(é);
             }
-        }
-
-        private const int POSTS_PER_REQUEST = 150;
-        private static readonly string[] _postStreamPath = new string[] { "post_stream", "posts" };
-        private async Task<IEnumerable<JToken>> GetRawPostStream(string topicString, IEnumerable<int> _stream)
-        {
-            var requests = _stream.Split(POSTS_PER_REQUEST).Select(stream =>
-            {
-                var streamParameters = stream.Select(id => Utility.KeyValuePair("post_ids[]", id.ToString())).ToList();
-                streamParameters.Add(Utility.KeyValuePair("include_raw", "1"));
-                return Get(topicString + "/posts", _postStreamPath, streamParameters.ToArray());
-            }).ToList(); //ToList here to ensure all the requests get sent.
-
-            var results = new List<JToken>();
-            foreach (var request in requests)
-            {
-                var result = await request as JArray;
-                if (result != null) results.AddRange(result);
-            }
-            return results;
         }
 
         private Post DecodePost(JToken post)
@@ -205,11 +249,12 @@ namespace Discouser.Data
             }
             catch (Exception é)
             {
-                var task = _logger.Log(é);
+                _logger.Log(é);
                 return null;
             }
         }
 
+        public const int AVATAR_SIZE = 64;
         private  User ExtractUserFromPost(JToken post)
         {
             try
@@ -217,7 +262,7 @@ namespace Discouser.Data
                 return new User()
                 {
                     Id = (int)post["user_id"],
-                    AvatarId = (int)post["uploaded_avatar_id"],
+                    AvatarPath = ((string)post["avatar_template"]).Replace("{size}", AVATAR_SIZE.ToString()),
                     Username = (string)post["username"],
                     DisplayName = (string)post["name"],
                     Title = (string)post["user_title"],
@@ -225,7 +270,7 @@ namespace Discouser.Data
             }
             catch (Exception é)
             {
-                var task = _logger.Log(é);
+                _logger.Log(é);
                 return null;
             }
         }
@@ -264,23 +309,8 @@ namespace Discouser.Data
             var result = await Get("posts/" + id, _jsonRoot);
             if (result == null) return null;
             return Tuple.Create(
-                new User()
-                {
-                    Id = (int)result["user_id"],
-                    AvatarId = (int)result["uploaded_avatar_id"],
-                    Username = (string)result["username"],
-                    DisplayName = (string)result["display_username"] ?? "",
-                    Title = (string)result["user_title"] ?? ""
-                },
-                new Post()
-                {
-                    Id = id,
-                    TopicId = (int)result["topic_id"],
-                    Text = (string)result["raw"],
-                    Html = (string)result["cooked"],
-                    UserId = (int)result["user_id"],
-                    Created = (DateTime)result["created_at"],
-                },
+                ExtractUserFromPost(result),
+                DecodePost(result),
                 result["reply_to_post_number"] == null ? null : new Reply()
                 {
                     ReplyPostId = id,
@@ -299,7 +329,8 @@ namespace Discouser.Data
                 Id = (int)topic["id"],
                 CategoryId = (int)topic["category_id"],
                 Name = (string)topic["title"],
-                Activity = (DateTime)topic["bumped_at"]
+                Activity = (DateTime)topic["bumped_at"],
+                LatestMessage = -1,
             }), morePages);
         }
     }

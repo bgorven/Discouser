@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace Discouser.Data.Messages
 {
+    [Table("TopicMessages")]
     internal class TopicMessage : Message
     {
         public TopicMessage(int id, string channel) : base(id, channel) { }
+        public TopicMessage() : base(0, "") { }
 
         /// <summary>
         /// https://github.com/discourse/discourse/blob/master/app/assets/javascripts/discourse/controllers/topic.js.es6
@@ -23,6 +26,7 @@ namespace Discouser.Data.Messages
             Deleted,
             Unknown
         }
+        [Indexed]
         public int TopicId { get; set; }
         public int PostNumber { get; set; }
         public int PostId { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Discouser.Data;
 using SQLite;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -26,6 +27,17 @@ namespace Discouser.ViewModel
         }
 
         public virtual Task Initialize() { return _nullTask; }
+
+        /// <summary>
+        /// Creates a callback that executes <code>NotifyChanges</code> on the same thread as
+        /// this method was originally called from.
+        /// </summary>
+        public Func<TModel, Task> Callback()
+        {
+            var dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
+            return async model => await dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                async () => await NotifyChanges(model));
+        }
 
         /// <summary>
         /// <para>Called by the DataContext when there is a change available.</para>

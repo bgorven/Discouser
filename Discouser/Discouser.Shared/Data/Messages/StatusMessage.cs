@@ -9,7 +9,7 @@ namespace Discouser.Data.Messages
     {
         public StatusMessage(int id, string channel) : base(id, channel) { }
 
-        public IEnumerable<KeyValuePair<string, int>> Statuses { get; private set; }
+        public IEnumerable<KeyValuePair<string, int>> Statuses { get; set; }
 
         public static StatusMessage Decode(JToken messageToDecode, int id, string channel)
         {

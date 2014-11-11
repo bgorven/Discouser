@@ -68,12 +68,11 @@ namespace Discouser
         {
             var topic = args.NewValue as ViewModel.Topic;
             if (topic == null) return;
-            var loadTask = topic.OnLoad();
+            await  topic.OnLoad();
             var prevTopic = _prevTopic;
             _prevTopic = topic;
 
             if (prevTopic != null) await prevTopic.OnUnload();
-            await loadTask;
         }
     }
 }

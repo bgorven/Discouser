@@ -44,12 +44,13 @@ namespace Discouser.Data
                 }
                 if (!result.IsSuccessStatusCode)
                 {
-                    await _logger.Log(result);
+                    _logger.Log(result);
                     return null;
                 }
 
                 if (result.Content.Headers.ContentType.MediaType != "application/json")
                 {
+                    _logger.Log("Received result of type: " + result.Content.Headers.ContentType.MediaType);
                     return null;
                 }
                 
@@ -57,7 +58,7 @@ namespace Discouser.Data
             }
             catch (Exception é)
             {
-                var task = _logger.Log(é, "HttpRequest to " + relativePath + "failed.");
+                _logger.Log(é, "HttpRequest to " + relativePath + "failed.");
                 return null;
             }
         }
@@ -110,7 +111,7 @@ namespace Discouser.Data
                 }
                 catch (Exception é)
                 {
-                    var task = _logger.Log(é, "Deserialize failed.");
+                    _logger.Log(é, "Deserialize failed.");
                     return null;
                 }
             }

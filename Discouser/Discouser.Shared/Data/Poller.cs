@@ -79,12 +79,19 @@ namespace Discouser.Data
             while (!_cancelled)
             {
                 var messages = await _context.Api.Poll(channels);
+                _topicMessages = new List<TopicMessage>();
                 foreach (var message in messages)
                 {
                     await Process(message);
+                    await _context.SaveTopicMessages(_topicMessages);
+                    await _context.NotifyTopics(_topicIds);
                 }
             }
         }
+
+        List<TopicMessage> _topicMessages;
+        HashSet<int> _topicIds;
+        List<int> _postIds;
 
 #pragma warning disable 1998
 
@@ -95,38 +102,14 @@ namespace Discouser.Data
 
         internal async Task Process(TopicMessage message)
         {
-            await _context.LatestTopicMessage(message.TopicId, message.MessageId);
-
-            switch (message.TopicMessageType)
-            {
-                case TopicMessage.Type.Created:
-                case TopicMessage.Type.Recovered:
-                    await _context.DownloadPost(message.PostId);
-                    callbacks[message.Channel](
-                        );
-                    break;
-                case TopicMessage.Type.Acted:
-                    await _context.DownloadLikes(message.PostId);
-                    callbacks[PostPrefix + message.PostId](
-                        );
-                    break;
-                case TopicMessage.Type.Rebaked:
-                case TopicMessage.Type.Revised:
-                    await _context.DownloadPost(message.PostId);
-                    callbacks[PostPrefix + message.PostId](
-                        );
-                    break;
-                case TopicMessage.Type.Deleted:
-                    await _context.DeletePost(message.PostId);
-                    callbacks[PostPrefix + message.PostId](
-                        );
-                    break;
-            }
+            _topicMessages.Add(message);
+            _topicIds.Add(message.TopicId);
+            _postIds.Add(message.PostId);
         }
 
         internal async Task Process(ErrorMessage errorMessage)
         {
-            await _logger.Log(errorMessage.RawMessage);
+            _logger.Log(errorMessage.RawMessage);
         }
 
         internal async Task Process(StatusMessage statusMessage)

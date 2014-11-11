@@ -18,10 +18,10 @@ namespace Discouser.ViewModel
 
         public override async Task Initialize()
         {
-            await _context.DownloadTopic(_model);
+            await _context.InitializeTopic(_model, Callback());
         }
 
-        public override async Task NotifyChanges(Model.Topic model)
+        public override async Task NotifyChanges(Model.Topic model = null)
         {
             _model = model ?? await LoadModel();
 

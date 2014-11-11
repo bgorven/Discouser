@@ -8,19 +8,19 @@ namespace Discouser
 {
     class Logger
     {
-        internal async Task Log(string error, string info = "")
+        internal void Log(string error, string info = "")
         {
-            await Task.FromResult(0);
+            
         }
 
-        internal async Task Log(Exception ex, string info = "")
+        internal void Log(Exception ex, string info = "")
         {
-            await Task.FromResult(0);
+            
         }
 
-        internal async Task Log(HttpResponseMessage result, string info = "")
+        internal void Log(HttpResponseMessage result, string info = "")
         {
-            await Task.FromResult(0);
+            
         }
     }
 }

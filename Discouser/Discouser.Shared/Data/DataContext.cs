@@ -7,6 +7,9 @@ using Discouser.Data;
 using Discouser.Model;
 using System.IO;
 using Windows.Storage;
+using System.Threading;
+using Discouser.Data.Messages;
+using System.Collections.Concurrent;
 
 namespace Discouser.Data
 {
@@ -72,9 +75,18 @@ namespace Discouser.Data
             _dbString = Path.Combine(StorageDir.Path, Username + ".db");
 
             _db = new SQLiteAsyncConnection(_dbString);
-
             await Transaction(db =>
             {
+                //db.DropTable<TopicMessage>();
+                //db.DropTable<Category>();
+                //db.DropTable<UserInfo>();
+                //db.DropTable<Topic>();
+                //db.DropTable<Reply>();
+                //db.DropTable<Like>();
+                //db.DropTable<Post>();
+                //db.DropTable<User>();
+                //db.DropTable<Site>();
+                db.CreateTable<TopicMessage>();
                 db.CreateTable<Category>();
                 db.CreateTable<UserInfo>();
                 db.CreateTable<Topic>();
@@ -130,7 +142,7 @@ namespace Discouser.Data
                     }
                     catch (Exception é)
                     {
-                        var task = Logger.Log(é);
+                        Logger.Log(é);
                     }
                 });
             }
@@ -178,8 +190,21 @@ namespace Discouser.Data
 
         internal async Task DownloadPost(int id)
         {
-            var post = await Api.GetPost(id);
-            await Transaction(db => db.InsertOrReplace(post));
+            var result = await Api.GetPost(id);
+            await Transaction(db =>
+            {
+                db.InsertOrReplace(result.Item1);
+                db.InsertOrReplace(result.Item2);
+                var reply = result.Item3;
+                if (reply != null)
+                {
+                    var originalPost = db.Table<Post>().Where(post => post.TopicId == result.Item2.TopicId && post.PostNumberInTopic == reply.OriginalPostId);
+                    if (originalPost.Any()){
+                        reply.OriginalPostId = originalPost.First().Id;
+                        db.InsertOrReplace(reply);
+                    }
+                }
+            });
         }
 
         public void Dispose()
@@ -191,15 +216,99 @@ namespace Discouser.Data
             }
         }
 
-        internal async Task DownloadTopic(Topic model)
+        private SingletonTask _topicTask;
+        private ConcurrentDictionary<int, Func<Topic, Task>> _topicCallbacks = new ConcurrentDictionary<int,Func<Topic,Task>>();
+        private ConcurrentDictionary<int, Func<Post, Task>> _postCallbacks = new ConcurrentDictionary<int,Func<Post,Task>>();
+
+        internal async Task InitializeTopic(Topic topic, Func<Topic, Task> callback)
         {
-            var thread = await Api.DownloadEntireThread(model.Id);
+            try
+            {
+                _topicCallbacks[topic.Id] = callback;
+                if (topic.LatestMessage == -1)
+                {
+                    var initial = await Api.DownloadTopicInitial(topic);
+                    var result = initial.Item2;
+                    await Transaction(InsertOrUpdateAction(result));
+
+                    if (_topicTask == null)
+                    {
+                        _topicTask = new SingletonTask(Logger);
+                    }
+                    await _topicTask.SetTask(async cancellationToken =>
+                    {
+                        result = await Api.DownloadTopicStream(topic, initial.Item1, cancellationToken);
+                        await Transaction(InsertOrUpdateAction(result));
+                        if (!cancellationToken.IsCancellationRequested) await callback(result.Topic);
+                    });
+                }
+                else await UpdateTopic(topic);
+            }
+            catch (Exception é)
+            {
+                Logger.Log(é);
+            }
+        }
+
+        private async Task UpdateTopic(Topic topic)
+        {
+            var unprocessedMessages = await Transaction(db => db
+                .Table<TopicMessage>()
+                .Where(message => message.TopicId == topic.Id && message.Id > topic.LatestMessage));
+
+            var updatedPosts = await Api.DownloadTopicStream(topic, unprocessedMessages.Select(message => message.PostId));
+            var deletedPosts = unprocessedMessages.Where(message => message.TopicMessageType == TopicMessage.Type.Deleted).ToArray();
             await Transaction(db =>
             {
-                db.InsertAll(thread.Item1, "OR REPLACE");
-                db.InsertAll(thread.Item2, "OR REPLACE");
-                db.Insert(thread.Item3, "OR REPLACE");
+                InsertOrUpdateAction(updatedPosts)(db);
+                foreach (var deletedPost in deletedPosts)
+                {
+                    try
+                    {
+                        var post = db.Get<Post>(deletedPost.PostId);
+                        post.Deleted = true;
+                        db.Update(post);
+                    }
+                    catch (Exception é)
+                    {
+                        Logger.Log(é, "Deleted post not found.");
+                    }
+                }
             });
+        }
+
+        private static Action<SQLiteConnection> InsertOrUpdateAction(ApiConnection.TopicResult result)
+        {
+            return db =>
+            {
+                db.InsertAll(result.Posts, "OR REPLACE");
+                db.InsertAll(result.Replies, "OR REPLACE");
+                db.InsertAll(result.Users, "OR REPLACE");
+                db.Insert(result.Topic, "OR REPLACE");
+            };
+        }
+
+        internal async Task SaveTopicMessages(List<TopicMessage> _topicMessages)
+        {
+            await Transaction(db => db.InsertAll(_topicMessages, "OR REPLACE"));
+        }
+
+        internal async Task NotifyTopics(IEnumerable<int> topicIds)
+        {
+            foreach (var topicId in topicIds)
+            {
+                Func<Topic, Task> callback;
+                if (_topicCallbacks.TryGetValue(topicId, out callback)) await callback(null);
+            }
+        }
+
+        internal async Task NotifyPosts(IEnumerable<int> postIds)
+        {
+            foreach (var postId in postIds)
+            {
+                Func<Post, Task> callback;
+                if (_postCallbacks.TryGetValue(postId, out callback)) await callback(null);
+            }
         }
     }
 }

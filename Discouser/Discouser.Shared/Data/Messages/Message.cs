@@ -1,6 +1,7 @@
 using Discouser.Data;
 using Discouser.Model;
 using Newtonsoft.Json.Linq;
+using SQLite;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace Discouser.Data.Messages
     {
         public Message(int id, string channel)
         {
-            MessageId = id;
+            Id = id;
             Channel = channel;
         }
 
@@ -20,8 +21,11 @@ namespace Discouser.Data.Messages
         /// </summary>
         public abstract Task BeProcessedBy(Poller poller);
 
-        public int MessageId { get; private set; }
-        public string Channel { get; private set; }
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [Ignore]
+        public string Channel { get; set; }
 
         public static Message Decode(JToken messageToDecode)
         {

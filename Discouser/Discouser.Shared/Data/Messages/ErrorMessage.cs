@@ -10,7 +10,7 @@ namespace Discouser.Data.Messages
             RawMessage = rawMessage;
         }
 
-        public string RawMessage { get; private set; }
+        public string RawMessage { get; set; }
 
         public override Task BeProcessedBy(Poller poller)
         {

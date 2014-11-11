@@ -15,6 +15,6 @@ namespace Discouser.Model
 
         public string Title { get; set; }
 
-        public int AvatarId { get; set; }
+        public string AvatarPath { get; set; }
     }
 }
