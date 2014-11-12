@@ -127,30 +127,29 @@ namespace Discouser.Data
 
         internal async Task InitializeCategory(Category category)
         {
-            var result = await DownloadCategory(category, 0);
-            if (result)
+            var result = await DownloadCategory(category);
+            var backgroundTask = Task.Run(async () =>
             {
-                var backgroundTask = Task.Run(async () =>
+                try
                 {
-                    var nextPage = 1;
-                    try
+                    while (!string.IsNullOrEmpty(result))
                     {
-                        while (await DownloadCategory(category, nextPage)) nextPage++;
-
-                        category.Initialized = true;
-                        await Transaction(db => db.Update(category));
+                        result = await DownloadCategory(category, result);
                     }
-                    catch (Exception é)
-                    {
-                        Logger.Log(é);
-                    }
-                });
-            }
+                    category.Initialized = true;
+                    await Transaction(db => db.Update(category));
+                }
+                catch (Exception é)
+                {
+                    Logger.Log(é);
+                }
+            });
         }
 
-        internal async Task<bool> DownloadCategory(Category category, int pageToGet)
+        internal async Task<string> DownloadCategory(Category category, string pageToGet = null)
         {
             var result = await Api.GetCategoryPage(category.Path, pageToGet);
+            if (result.Item1 == null || !result.Item1.Any()) throw new FileNotFoundException("Category ‘" + category.Path + "’ failed to download");
             await Transaction(db => db.InsertAll(result.Item1, "OR REPLACE"));
             return result.Item2;
         }
@@ -228,18 +227,31 @@ namespace Discouser.Data
                 if (topic.LatestMessage == -1)
                 {
                     var initial = await Api.DownloadTopicInitial(topic);
-                    var result = initial.Item2;
-                    await Transaction(InsertOrUpdateAction(result));
+                    var resultList = initial.Item2;
+                    await Transaction(InsertOrUpdateAction(resultList, topic));
 
                     if (_topicTask == null)
                     {
                         _topicTask = new SingletonTask(Logger);
                     }
-                    await _topicTask.SetTask(async cancellationToken =>
+                    await _topicTask.SetTask(topic.Name, async cancellationToken =>
                     {
-                        result = await Api.DownloadTopicStream(topic, initial.Item1, cancellationToken);
-                        await Transaction(InsertOrUpdateAction(result));
-                        if (!cancellationToken.IsCancellationRequested) await callback(result.Topic);
+                        var results = Api.DownloadTopicStream(topic, initial.Item1);
+                        foreach (var resultTask in results)
+                        {
+                            if (cancellationToken.IsCancellationRequested) break;
+                            var result = await resultTask;
+                            await Transaction(InsertOrUpdateAction(result, topic));
+                        }
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            topic.LatestMessage = -1;
+                            await Transaction(db => db.Update(topic));
+                        }
+                        else
+                        {
+                            await callback(topic);
+                        }
                     });
                 }
                 else await UpdateTopic(topic);
@@ -256,35 +268,51 @@ namespace Discouser.Data
                 .Table<TopicMessage>()
                 .Where(message => message.TopicId == topic.Id && message.Id > topic.LatestMessage));
 
-            var updatedPosts = await Api.DownloadTopicStream(topic, unprocessedMessages.Select(message => message.PostId));
+            var updatedPostsList = Api.DownloadTopicStream(topic, unprocessedMessages.Select(message => message.PostId));
             var deletedPosts = unprocessedMessages.Where(message => message.TopicMessageType == TopicMessage.Type.Deleted).ToArray();
-            await Transaction(db =>
+            foreach (var updatedPostsTask in updatedPostsList)
             {
-                InsertOrUpdateAction(updatedPosts)(db);
-                foreach (var deletedPost in deletedPosts)
+                var updatedPosts = await updatedPostsTask;
+                await Transaction(db =>
                 {
-                    try
+                    InsertOrUpdateAction(updatedPosts, topic)(db);
+                    foreach (var deletedPost in deletedPosts)
                     {
-                        var post = db.Get<Post>(deletedPost.PostId);
-                        post.Deleted = true;
-                        db.Update(post);
+                        try
+                        {
+                            var post = db.Get<Post>(deletedPost.PostId);
+                            post.Deleted = true;
+                            db.Update(post);
+                        }
+                        catch (Exception é)
+                        {
+                            Logger.Log(é, "Deleted post not found.");
+                        }
                     }
-                    catch (Exception é)
-                    {
-                        Logger.Log(é, "Deleted post not found.");
-                    }
-                }
-            });
+                });
+            }
         }
 
-        private static Action<SQLiteConnection> InsertOrUpdateAction(ApiConnection.TopicResult result)
+        private Action<SQLiteConnection> InsertOrUpdateAction(IEnumerable<Tuple<Post,User,Reply>> results, Topic topic)
         {
             return db =>
             {
-                db.InsertAll(result.Posts, "OR REPLACE");
-                db.InsertAll(result.Replies, "OR REPLACE");
-                db.InsertAll(result.Users, "OR REPLACE");
-                db.Insert(result.Topic, "OR REPLACE");
+                db.InsertAll(results.Select(tuple => tuple.Item1).Where(i => i != null), "OR REPLACE");
+                db.InsertAll(results.Select(tuple => tuple.Item2).Where(i => i != null), "OR REPLACE");
+                db.InsertAll(results.Select(tuple => {
+                    if (tuple.Item3 == null) return null;
+                    try
+                    {
+                        tuple.Item3.OriginalPostId = db.Table<Post>().Where(post => post.TopicId == topic.Id && post.PostNumberInTopic == tuple.Item3.OriginalPostId).First().Id;
+                    }
+                    catch (Exception é)
+                    {
+                        Logger.Log(é);
+                        return null;
+                    }
+                    return tuple.Item3;
+                }).Where(i => i != null), "OR REPLACE");
+                if (topic != null) db.Insert(topic, "OR REPLACE");
             };
         }
 

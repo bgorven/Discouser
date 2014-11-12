@@ -120,7 +120,7 @@ namespace Discouser.Data
         private static HttpRequestMessage BuildRequest(string host, string path, HttpMethod method, IEnumerable<KeyValuePair<string, string>> parameters)
         {
             var sendContent = method == HttpMethod.Put || method == HttpMethod.Post || method == HttpMethod.Patch;
-            path = (path.StartsWith("/") ? "" : "/") + path + (path.EndsWith("/") ? "" : "/");
+            path = (path.StartsWith("/") ? "" : "/") + path;
             
             var query = "?";
             if (!sendContent)
@@ -141,10 +141,9 @@ namespace Discouser.Data
                 {
                     query = query.Replace('?', '&');
                 }
-                else
+                else if (!path.EndsWith("/"))
                 {
-                    //path should end with '/' by this point.
-                    path = path.Substring(0, path.Length - 1) + ".json";
+                    path = path + ".json";
                 }
             }
 

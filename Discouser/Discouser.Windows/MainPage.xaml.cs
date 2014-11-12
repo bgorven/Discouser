@@ -62,17 +62,5 @@ namespace Discouser
             CategoryGrid.RowDefinitions[0].Height = new GridLength(0, GridUnitType.Pixel);
             CategoryGrid.RowDefinitions[1].Height = new GridLength(0, GridUnitType.Star);
         }
-
-        private ViewModel.Topic _prevTopic = null;
-        private async void TopicGrid_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
-        {
-            var topic = args.NewValue as ViewModel.Topic;
-            if (topic == null) return;
-            await  topic.OnLoad();
-            var prevTopic = _prevTopic;
-            _prevTopic = topic;
-
-            if (prevTopic != null) await prevTopic.OnUnload();
-        }
     }
 }

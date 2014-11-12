@@ -6,11 +6,6 @@ namespace Discouser.Model
     [Table("Topics")]
     class Topic : IModel
     {
-        public Topic()
-        {
-            LatestMessage = -1;
-        }
-
         [PrimaryKey]
         public int Id { get; set; }
 

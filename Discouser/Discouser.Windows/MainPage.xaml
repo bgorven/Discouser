@@ -37,6 +37,9 @@
                         <DataTemplate>
                             <Canvas Width="244" Height="66">
                                 <Interactivity:Interaction.Behaviors>
+                                    <Core:EventTriggerBehavior EventName="DataContextChanged">
+                                        <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
+                                    </Core:EventTriggerBehavior>
                                     <Core:EventTriggerBehavior EventName="Loaded">
                                         <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
                                     </Core:EventTriggerBehavior>
@@ -126,6 +129,9 @@
                 <Core:EventTriggerBehavior EventName="DataContextChanged">
                     <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
                 </Core:EventTriggerBehavior>
+                <Core:EventTriggerBehavior EventName="Loaded">
+                    <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
+                </Core:EventTriggerBehavior>
             </Interactivity:Interaction.Behaviors>
             <StackPanel Grid.Row="0">
 				<StackPanel.Background>
@@ -147,8 +153,16 @@
 					</DataTemplate>
 				</ListView.ItemTemplate>
 			</ListView>
-            <Grid Name="TopicGrid" Grid.Row="2" DataContextChanged="TopicGrid_DataContextChanged"
+            <Grid Name="TopicGrid" Grid.Row="2"
                   d:DataContext="{d:DesignData /SampleData/TopicSampleData.xaml}" DataContext="{Binding SelectedItem, ElementName=Topics}" >
+                <Interactivity:Interaction.Behaviors>
+                    <Core:EventTriggerBehavior EventName="DataContextChanged">
+                        <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
+                    </Core:EventTriggerBehavior>
+                    <Core:EventTriggerBehavior EventName="Loaded">
+                        <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
+                    </Core:EventTriggerBehavior>
+                </Interactivity:Interaction.Behaviors>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
                     <RowDefinition />
@@ -170,7 +184,31 @@
                     </ListView.ItemsPanel>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Margin="10" Text="{Binding Text}"/>
+                            <Grid Name="PostGrid">
+                                <Interactivity:Interaction.Behaviors>
+                                    <Core:EventTriggerBehavior EventName="DataContextChanged">
+                                        <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
+                                    </Core:EventTriggerBehavior>
+                                    <Core:EventTriggerBehavior EventName="Loaded">
+                                        <Core:CallMethodAction MethodName="Loaded" TargetObject="{Binding}"/>
+                                    </Core:EventTriggerBehavior>
+                                </Interactivity:Interaction.Behaviors>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                                    <TextBlock Margin="10,0" Text="{Binding User.Username}" Foreground="DarkGray"/>
+                                    <TextBlock Margin="10,0" Text="{Binding User.DisplayName}" Foreground="LightGray"/>
+                                    <TextBlock Margin="10,0" Text="{Binding User.Title}" />
+                                </StackPanel>
+                                <Image Grid.Column="0" Grid.Row="1" Source="{Binding User.AvatarPath}" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10" Text="{Binding Text}" TextWrapping="WrapWholeWords"/>
+                            </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

@@ -80,6 +80,8 @@ namespace Discouser.Data
             {
                 var messages = await _context.Api.Poll(channels);
                 _topicMessages = new List<TopicMessage>();
+                _topicIds = new HashSet<int>();
+                _postIds = new List<int>();
                 foreach (var message in messages)
                 {
                     await Process(message);

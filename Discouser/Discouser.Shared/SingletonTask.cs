@@ -8,7 +8,7 @@ namespace Discouser
 {
     class SingletonTask
     {
-        private Tuple<Task, CancellationTokenSource> _task;
+        private Tuple<string, Task, CancellationTokenSource> _task;
         private Logger _logger;
 
         internal SingletonTask(Logger logger)
@@ -16,19 +16,19 @@ namespace Discouser
             _logger = logger;
         }
 
-        internal async Task SetTask(Func<CancellationToken, Task> action)
+        internal async Task SetTask(string taskName, Func<CancellationToken, Task> action)
         {
             var newSource = new CancellationTokenSource();
-            var newTask = Tuple.Create(Task.Run(async () => await action(newSource.Token), newSource.Token), newSource);
+            var newTask = Tuple.Create(taskName, Task.Run(async () => await action(newSource.Token), newSource.Token), newSource);
 
             var oldTask = Interlocked.Exchange(ref _task, newTask);
 
             if (oldTask == null) return;
             try
             {
-                oldTask.Item2.Cancel();
-                await oldTask.Item1;
-                oldTask.Item2.Dispose();
+                oldTask.Item3.Cancel();
+                await oldTask.Item2;
+                oldTask.Item3.Dispose();
             }
             catch (AggregateException e)
             {

@@ -86,7 +86,7 @@ namespace Discouser.ViewModel
             return _nullTask;
         }
 
-        public async void Loaded()
+        public virtual async void Loaded()
         {
             await OnLoad();
         }

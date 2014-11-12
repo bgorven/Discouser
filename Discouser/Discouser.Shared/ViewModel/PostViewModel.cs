@@ -33,32 +33,45 @@ namespace Discouser.ViewModel
 
             await _context.Transaction(Db =>
             {
-                if (Db.Table<Model.Reply>().Where(reply => reply.ReplyPostId == _model.Id).Count() != RepliesTo.Count)
+                /*var repliesTo = Db.Table<Model.Reply>().Where(reply => reply.ReplyPostId == _model.Id);
+                if (RepliesTo == null || repliesTo.Count() != RepliesTo.Count)
                 {
-                    RepliesTo = new ObservableCollection<Post>(Db.Table<Model.Reply>()
-                        .Where(reply => reply.ReplyPostId == _model.Id).ToList()
-                        .Select(reply => new Post(Db.Get<Model.Post>(reply.OriginalPostId), _context)));
+                    RepliesTo = new ObservableCollection<Post>(from reply in repliesTo.AsEnumerable()
+                                                               join post in Db.Table<Model.Post>() on reply.OriginalPostId equals post.Id
+                                                               select new Post(post, _context));
                     changedProperties.Add("RepliesTo");
                 }
 
-                if (Db.Table<Model.Reply>().Where(reply => reply.OriginalPostId == _model.Id).Count() != Replies.Count)
+                var replies = Db.Table<Model.Reply>().Where(reply => reply.OriginalPostId == _model.Id);
+                if (Replies == null || replies.Count() != Replies.Count)
                 {
-                    Replies = new ObservableCollection<Post>(Db.Table<Model.Reply>()
-                        .Where(reply => reply.OriginalPostId == _model.Id).ToList()
-                        .Select(reply => new Post(Db.Get<Model.Post>(reply.ReplyPostId), _context)));
+                    Replies = new ObservableCollection<Post>(from reply in replies.AsEnumerable()
+                                                             join post in Db.Table<Model.Post>() on reply.ReplyPostId equals post.Id
+                                                             select new Post(post, _context));
                     changedProperties.Add("Replies");
                 }
 
-                var likeCount = Db.Table<Model.Like>().Where(like => like.PostId == _model.Id).Count();
-                if (likeCount != LikeCount)
+                var likes = Db.Table<Model.Like>().Where(like => like.PostId == _model.Id);
+                if (Likes == null || likes.Count() != LikeCount)
                 {
-                    RaisePropertyChanged(new string[] { "LikeCount", "Likes" });
-                }
+                    Likes = new ObservableCollection<User>(from like in likes.AsEnumerable()
+                                                           join user in Db.Table<Model.User>() on like.UserId equals user.Id
+                                                           select new User(user, null, _context));
+                    changedProperties.Add("LikeCount");
+                    changedProperties.Add("Likes");
+                }*/
 
                 if (User == null)
                 {
-                    User = new User(Db.Get<Model.User>(model.UserId), Db.Get<Model.UserInfo>(model.UserId), _context);
-                    changedProperties.Add("User");
+                    try
+                    {
+                        User = new User(Db.Get<Model.User>(model.UserId), null, _context);
+                        changedProperties.Add("User");
+                    }
+                    catch (Exception é)
+                    {
+                        _context.Logger.Log(é);
+                    }
                 }
             });
 

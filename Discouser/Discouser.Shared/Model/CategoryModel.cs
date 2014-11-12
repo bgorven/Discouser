@@ -16,8 +16,6 @@ namespace Discouser.Model
 
         public string TextColor { get; set; }
 
-        public int PagesFetched { get; set; }
-
         public bool Initialized { get; set; }
 
         public string Path { get; set; }

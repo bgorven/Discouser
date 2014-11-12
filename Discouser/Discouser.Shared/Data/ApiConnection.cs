@@ -122,7 +122,7 @@ namespace Discouser.Data
             return "/t/" + topic.Id;
         }
 
-        internal async Task<Tuple<int[], TopicResult>> DownloadTopicInitial(Topic topic)
+        internal async Task<Tuple<int[], IEnumerable<Tuple<Post, User, Reply>>>> DownloadTopicInitial(Topic topic)
         {
             topic.LatestMessage = -1;
 
@@ -137,50 +137,31 @@ namespace Discouser.Data
             var result = await Get(RequestString(topic), _jsonRoot, Utility.KeyValuePair("include_raw", "1"));
             if (result == null) return null;
 
-            topic.Activity = (DateTime)result["last_posted_at"];
+            var activity = result["last_posted_at"];
+            if (activity != null && activity.Type == JTokenType.Date) topic.Activity = (DateTime)activity;
             topic.CategoryId = (int)result["category_id"];
             topic.Name = (string)result["title"];
 
             var poststream = result["post_stream"]["posts"];
             var stream = result["post_stream"]["stream"].Select(value => (int)value).ToArray();
 
-            var posts = new Dictionary<int, Post>();
-            var users = new Dictionary<int, User>();
-            var replies = new List<Reply>();
+            var users = new HashSet<int>();
 
-            foreach (var token in poststream)
-            {
-                DecodePostToken(token, posts, users, replies);
-            }
-
-            return Tuple.Create(stream, new TopicResult(topic, posts, users, replies));
+            return Tuple.Create(stream, poststream.Select(token => DecodePostToken(token)).Where(r => r != null));
         }
 
-        internal async Task<TopicResult> DownloadTopicStream(Topic topic, IEnumerable<int> stream, CancellationToken cancellationToken = default(CancellationToken))
+        internal IEnumerable<Task<IEnumerable<Tuple<Post,User,Reply>>>> DownloadTopicStream(Topic topic, IEnumerable<int> stream)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            var users = new HashSet<int>();
 
-            var posts = new Dictionary<int, Post>();
-            var users = new Dictionary<int, User>();
-            var replies = new List<Reply>();
+            return GetRawPostStream(RequestString(topic), stream).Select(task => ProcessRawPostStream(task));
+        }
 
-            foreach (var task in GetRawPostStream(RequestString(topic), stream))
-            {
-                var jarray = await task as JArray;
-                if (jarray != null)
-                {
-                    foreach (var token in jarray)
-                    {
-                        DecodePostToken(token, posts, users, replies);
-                    }
-                }
-                else
-                {
-                    topic.LatestMessage = -1;
-                }
-            }
+        private async Task<IEnumerable<Tuple<Post,User,Reply>>> ProcessRawPostStream(Task<JToken> task)
+        {
+            var jarray = await task as JArray;
 
-            return new TopicResult(topic, posts, users, replies);
+            return jarray.Select(token => DecodePostToken(token)).Where(result => result != null);
         }
 
         private const int POSTS_PER_REQUEST = 150;
@@ -196,38 +177,43 @@ namespace Discouser.Data
             });
         }
 
-        private void DecodePostToken(JToken token, Dictionary<int, Post> posts, Dictionary<int, User> users, List<Reply> replies)
+        private Tuple<Post, User, Reply> DecodePostToken(JToken token)
         {
             try
             {
                 var user = ExtractUserFromPost(token);
-                if (user != null) users[user.Id] = user;
-
                 var post = DecodePost(token);
 
                 if (token["raw"] == null)
                 {
-                    ;
+                    _logger.Log("Raw text missing from post");
                 } 
 
-                if (post != null)
+                if (post == null)
                 {
-                    posts[post.PostNumberInTopic] = post;
-
+                    return null;
+                }
+                else
+                {
                     if (token["reply_to_post_number"] != null && token["reply_to_post_number"].Type == JTokenType.Integer)
                     {
                         var reply = new Reply()
                         {
-                            OriginalPostId = posts[(int)token["reply_to_post_number"]].Id,
+                            OriginalPostId = (int)token["reply_to_post_number"],
                             ReplyPostId = (int)token["id"],
                         };
-                        replies.Add(reply);
+                        return Tuple.Create(post, user, reply);
+                    }
+                    else
+                    {
+                        return Tuple.Create(post, user, (Reply)null);
                     }
                 }
             }
             catch (Exception é)
             {
                 _logger.Log(é);
+                return null;
             }
         }
 
@@ -259,10 +245,13 @@ namespace Discouser.Data
         {
             try
             {
+                var host = new Uri(_host);
+                var relative = new Uri(((string)post["avatar_template"]).Replace("{size}", AVATAR_SIZE.ToString()), UriKind.Relative);
+                var absolute = new Uri(host, relative);
                 return new User()
                 {
                     Id = (int)post["user_id"],
-                    AvatarPath = ((string)post["avatar_template"]).Replace("{size}", AVATAR_SIZE.ToString()),
+                    AvatarPath = absolute.AbsoluteUri,
                     Username = (string)post["username"],
                     DisplayName = (string)post["name"],
                     Title = (string)post["user_title"],
@@ -319,13 +308,17 @@ namespace Discouser.Data
         }
 
         private static readonly string[] _categoryTopicsPath = new string[] { "topic_list" };
-        internal async Task<Tuple<IEnumerable<Model.Topic>, bool>> GetCategoryPage(string path, int pageToGet)
+        internal async Task<Tuple<IEnumerable<Model.Topic>, string>> GetCategoryPage(string path, string pageToGet)
         {
-            var result = await Get("c/" + path, _categoryTopicsPath) as JObject;
-            if (result == null) return new Tuple<IEnumerable<Model.Topic>, bool>(new Topic[0], false);
-            var morePages = result["more_topics_url"] != null && result["more_topics_url"].Type != JTokenType.Null;
+            var result = await Get(pageToGet ?? "c/" + path, _categoryTopicsPath) as JObject;
 
-            return new Tuple<IEnumerable<Topic>, bool>(result["topics"].Select(topic => new Topic() {
+            if (result == null)
+            {
+                return Tuple.Create(Enumerable.Empty<Topic>(), "");
+            }
+            var morePages = (string)result["more_topics_url"];
+
+            return Tuple.Create(result["topics"].Select(topic => new Topic() {
                 Id = (int)topic["id"],
                 CategoryId = (int)topic["category_id"],
                 Name = (string)topic["title"],

@@ -71,7 +71,6 @@ namespace Discouser.ViewModel
                 NewSiteLoading = false;
                 if (loggedInUser != null && loggedInUser.Equals(username, StringComparison.OrdinalIgnoreCase))
                 {
-                    await siteToAdd.Initialize();
                     AddSite(siteToAdd);
                     NewSiteUrl = "";
                     NewSiteUsername = "";
