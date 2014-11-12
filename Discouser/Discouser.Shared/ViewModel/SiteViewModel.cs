@@ -24,9 +24,12 @@ namespace Discouser.ViewModel
 
         public override async Task NotifyChanges(Model.Site model)
         {
-            _categories = new ObservableCollection<Category>((await _context.AllCategories()).Select(category => new Category(category, _context)));
-            _changedProperties = new string[] { "Categories" };
-            Changes = true;
+            if (_categories == null)
+            {
+                _categories = new ObservableCollection<Category>((await _context.AllCategories()).Select(category => new Category(category, _context)));
+                _changedProperties = new string[] { "Categories" };
+                Changes = true;
+            }
         }
 
         private ObservableCollection<Category> _categories;
