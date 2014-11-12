@@ -116,7 +116,7 @@ namespace Discouser.Data
         {
             var categories = await Api.GetAllCategories();
 
-            await Transaction(db => db.InsertAll(categories, "OR REPLACE"));
+            await Transaction(db => db.InsertAll(categories, "OR IGNORE"));
 
         }
 
@@ -150,7 +150,7 @@ namespace Discouser.Data
         {
             var result = await Api.GetCategoryPage(category.Path, pageToGet);
             if (result.Item1 == null || !result.Item1.Any()) throw new FileNotFoundException("Category ‘" + category.Path + "’ failed to download");
-            await Transaction(db => db.InsertAll(result.Item1, "OR REPLACE"));
+            await Transaction(db => db.InsertAll(result.Item1, "OR IGNORE"));
             return result.Item2;
         }
 
@@ -194,15 +194,6 @@ namespace Discouser.Data
             {
                 db.InsertOrReplace(result.Item1);
                 db.InsertOrReplace(result.Item2);
-                var reply = result.Item3;
-                if (reply != null)
-                {
-                    var originalPost = db.Table<Post>().Where(post => post.TopicId == result.Item2.TopicId && post.PostNumberInTopic == reply.OriginalPostId);
-                    if (originalPost.Any()){
-                        reply.OriginalPostId = originalPost.First().Id;
-                        db.InsertOrReplace(reply);
-                    }
-                }
             });
         }
 
@@ -228,7 +219,7 @@ namespace Discouser.Data
                 {
                     var initial = await Api.DownloadTopicInitial(topic);
                     var resultList = initial.Item2;
-                    await Transaction(InsertOrUpdateAction(resultList, topic));
+                    await Transaction(db => InsertOrUpdateAll(resultList, db));
 
                     if (_topicTask == null)
                     {
@@ -236,20 +227,22 @@ namespace Discouser.Data
                     }
                     await _topicTask.SetTask(topic.Name, async cancellationToken =>
                     {
-                        var results = Api.DownloadTopicStream(topic, initial.Item1);
+                        var alreadyDownloaded = new HashSet<int>(await Transaction(db => db.Table<Post>() 
+                                                                          .Where(post => post.TopicId == topic.Id)
+                                                                          .AsEnumerable()
+                                                                          .Select(post => post.Id)));
+                        var yetToDownload = initial.Item1.Where(post => !alreadyDownloaded.Contains(post));
+                        var results = Api.DownloadTopicStream(topic, yetToDownload);
                         foreach (var resultTask in results)
                         {
                             if (cancellationToken.IsCancellationRequested) break;
                             var result = await resultTask;
-                            await Transaction(InsertOrUpdateAction(result, topic));
+                            await Transaction(db => InsertOrUpdateAll(result, db));
                         }
-                        if (cancellationToken.IsCancellationRequested)
+                        if (!cancellationToken.IsCancellationRequested)
                         {
-                            topic.LatestMessage = -1;
-                            await Transaction(db => db.Update(topic));
-                        }
-                        else
-                        {
+                            //Download completed successfully, save updated topic with latestmessage
+                            await Transaction(db => db.Update(initial.Item3));
                             await callback(topic);
                         }
                     });
@@ -268,14 +261,20 @@ namespace Discouser.Data
                 .Table<TopicMessage>()
                 .Where(message => message.TopicId == topic.Id && message.Id > topic.LatestMessage));
 
+            if (!unprocessedMessages.Any()) return;
+
+            topic.LatestMessage = unprocessedMessages.Select(message => message.Id).Max();
+
             var updatedPostsList = Api.DownloadTopicStream(topic, unprocessedMessages.Select(message => message.PostId));
             var deletedPosts = unprocessedMessages.Where(message => message.TopicMessageType == TopicMessage.Type.Deleted).ToArray();
+
             foreach (var updatedPostsTask in updatedPostsList)
             {
                 var updatedPosts = await updatedPostsTask;
                 await Transaction(db =>
                 {
-                    InsertOrUpdateAction(updatedPosts, topic)(db);
+                    db.Update(topic);
+                    InsertOrUpdateAll(updatedPosts, db);
                     foreach (var deletedPost in deletedPosts)
                     {
                         try
@@ -293,27 +292,10 @@ namespace Discouser.Data
             }
         }
 
-        private Action<SQLiteConnection> InsertOrUpdateAction(IEnumerable<Tuple<Post,User,Reply>> results, Topic topic)
+        private void InsertOrUpdateAll(IEnumerable<Tuple<Post,User>> results, SQLiteConnection db)
         {
-            return db =>
-            {
-                db.InsertAll(results.Select(tuple => tuple.Item1).Where(i => i != null), "OR REPLACE");
-                db.InsertAll(results.Select(tuple => tuple.Item2).Where(i => i != null), "OR REPLACE");
-                db.InsertAll(results.Select(tuple => {
-                    if (tuple.Item3 == null) return null;
-                    try
-                    {
-                        tuple.Item3.OriginalPostId = db.Table<Post>().Where(post => post.TopicId == topic.Id && post.PostNumberInTopic == tuple.Item3.OriginalPostId).First().Id;
-                    }
-                    catch (Exception é)
-                    {
-                        Logger.Log(é);
-                        return null;
-                    }
-                    return tuple.Item3;
-                }).Where(i => i != null), "OR REPLACE");
-                if (topic != null) db.Insert(topic, "OR REPLACE");
-            };
+            db.InsertAll(results.Select(tuple => tuple.Item1).Where(i => i != null), "OR REPLACE");
+            db.InsertAll(results.Select(tuple => tuple.Item2).Where(i => i != null), "OR REPLACE");
         }
 
         internal async Task SaveTopicMessages(List<TopicMessage> _topicMessages)

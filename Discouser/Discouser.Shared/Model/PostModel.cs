@@ -25,5 +25,8 @@ namespace Discouser.Model
         public string Html { get; set; }
 
         public bool Deleted { get; set; }
+
+        [Indexed]
+        public int? ReplyToPostInTopic { get; set; }
     }
 }

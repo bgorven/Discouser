@@ -63,14 +63,11 @@ namespace Discouser.ViewModel
 
                 if (User == null)
                 {
-                    try
+                    var u = Db.Table<Model.User>().Where(user => user.Id == model.UserId);
+                    if (u.Any())
                     {
-                        User = new User(Db.Get<Model.User>(model.UserId), null, _context);
+                        User = new User(u.First(), null, _context);
                         changedProperties.Add("User");
-                    }
-                    catch (Exception é)
-                    {
-                        _context.Logger.Log(é);
                     }
                 }
             });

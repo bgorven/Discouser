@@ -122,7 +122,7 @@ namespace Discouser.Data
             return "/t/" + topic.Id;
         }
 
-        internal async Task<Tuple<int[], IEnumerable<Tuple<Post, User, Reply>>>> DownloadTopicInitial(Topic topic)
+        internal async Task<Tuple<int[], IEnumerable<Tuple<Post, User>>, Topic>> DownloadTopicInitial(Topic topic)
         {
             topic.LatestMessage = -1;
 
@@ -147,17 +147,17 @@ namespace Discouser.Data
 
             var users = new HashSet<int>();
 
-            return Tuple.Create(stream, poststream.Select(token => DecodePostToken(token)).Where(r => r != null));
+            return Tuple.Create(stream, poststream.Select(token => DecodePostToken(token)).Where(r => r != null), topic);
         }
 
-        internal IEnumerable<Task<IEnumerable<Tuple<Post,User,Reply>>>> DownloadTopicStream(Topic topic, IEnumerable<int> stream)
+        internal IEnumerable<Task<IEnumerable<Tuple<Post,User>>>> DownloadTopicStream(Topic topic, IEnumerable<int> stream)
         {
             var users = new HashSet<int>();
 
             return GetRawPostStream(RequestString(topic), stream).Select(task => ProcessRawPostStream(task));
         }
 
-        private async Task<IEnumerable<Tuple<Post,User,Reply>>> ProcessRawPostStream(Task<JToken> task)
+        private async Task<IEnumerable<Tuple<Post,User>>> ProcessRawPostStream(Task<JToken> task)
         {
             var jarray = await task as JArray;
 
@@ -177,7 +177,7 @@ namespace Discouser.Data
             });
         }
 
-        private Tuple<Post, User, Reply> DecodePostToken(JToken token)
+        private Tuple<Post, User> DecodePostToken(JToken token)
         {
             try
             {
@@ -189,26 +189,7 @@ namespace Discouser.Data
                     _logger.Log("Raw text missing from post");
                 } 
 
-                if (post == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    if (token["reply_to_post_number"] != null && token["reply_to_post_number"].Type == JTokenType.Integer)
-                    {
-                        var reply = new Reply()
-                        {
-                            OriginalPostId = (int)token["reply_to_post_number"],
-                            ReplyPostId = (int)token["id"],
-                        };
-                        return Tuple.Create(post, user, reply);
-                    }
-                    else
-                    {
-                        return Tuple.Create(post, user, (Reply)null);
-                    }
-                }
+                return Tuple.Create(post, user);
             }
             catch (Exception é)
             {
@@ -231,6 +212,7 @@ namespace Discouser.Data
                     PostNumberInTopic = (int)post["post_number"],
                     TopicId = (int)post["topic_id"],
                     UserId = (int)post["user_id"],
+                    ReplyToPostInTopic = (int?)post["reply_to_post_number"]
                 };
             }
             catch (Exception é)
@@ -293,18 +275,11 @@ namespace Discouser.Data
         /// <summary>
         /// <para>Note that the value of Reply.OriginalPostId returned here is actually the post number within the current topic :(</para>
         /// </summary>
-        internal async Task<Tuple<User,Post,Reply>> GetPost(int id)
+        internal async Task<Tuple<Post,User>> GetPost(int id)
         {
             var result = await Get("posts/" + id, _jsonRoot);
             if (result == null) return null;
-            return Tuple.Create(
-                ExtractUserFromPost(result),
-                DecodePost(result),
-                result["reply_to_post_number"] == null ? null : new Reply()
-                {
-                    ReplyPostId = id,
-                    OriginalPostId = (int)result["reply_to_post_number"]
-                });
+            return DecodePostToken(result);
         }
 
         private static readonly string[] _categoryTopicsPath = new string[] { "topic_list" };
