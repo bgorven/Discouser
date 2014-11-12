@@ -165,7 +165,7 @@
                 </Interactivity:Interaction.Behaviors>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
-                    <RowDefinition />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
@@ -176,7 +176,7 @@
                 </Button>
                 <TextBlock Name="TopicTitle" Text="{Binding Name}" Grid.Row="0" Grid.Column="1" FontSize="24" Margin="10" Visibility="Collapsed"/>
                 <ListView Grid.Column="1" Grid.Row="1" Name="Posts" ItemsSource="{Binding Posts}" DoubleTapped="Posts_DoubleTapped"
-                          Visibility="{Binding Initialized, Converter={StaticResource VisiblityConverter}}">
+                          Visibility="{Binding Initialized, Converter={StaticResource VisiblityConverter}}" Margin="1,1,-1,-1">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel />
@@ -206,7 +206,7 @@
                                     <TextBlock Margin="10,0" Text="{Binding User.DisplayName}" Foreground="LightGray"/>
                                     <TextBlock Margin="10,0" Text="{Binding User.Title}" />
                                 </StackPanel>
-                                <Image Grid.Column="0" Grid.Row="1" Source="{Binding User.AvatarPath}" />
+                                <Image Grid.Column="0" Grid.Row="1" Source="{Binding User.AvatarPath}" VerticalAlignment="Top" />
                                 <TextBlock Grid.Row="1" Grid.Column="1" Margin="10" Text="{Binding Text}" TextWrapping="WrapWholeWords"/>
                             </Grid>
                         </DataTemplate>
