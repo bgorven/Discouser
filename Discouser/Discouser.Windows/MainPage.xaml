@@ -140,7 +140,7 @@
 				<TextBlock Margin="10" Text="{Binding Name}" Foreground="{Binding TextColor}" FontSize="24" />
 				<TextBlock Margin="10,0,10,10" Text="{Binding Description}" Foreground="{Binding TextColor}" FontSize="18" />
             </StackPanel>
-            <ProgressRing Grid.Row="1" Width="60" Height="60" HorizontalAlignment="Left" IsActive="{Binding Initialized, Converter={StaticResource BooleanInverter}}" Visibility="{Binding Initialized, Converter={StaticResource InverseVisiblityConverter}}" />
+            <ProgressRing Grid.Row="1" Width="60" Height="60" HorizontalAlignment="Center" IsActive="{Binding Initialized, Converter={StaticResource BooleanInverter}}" Visibility="{Binding Initialized, Converter={StaticResource InverseVisiblityConverter}}" />
             <ListView Name="Topics" Grid.Row="1" ItemsSource="{Binding Topics}" Visibility="{Binding Initialized, Converter={StaticResource VisiblityConverter}}">
 				<ListView.ItemsPanel>
 					<ItemsPanelTemplate>
@@ -171,10 +171,12 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Button Name="BackButton" Grid.Row="0" Grid.Column="0" Click="BackButton_Click" Visibility="Collapsed">
-                    <Image Source="Images/back.png" Width="32" Height="32"/>
-                </Button>
+                <Button Name="BackButton" Grid.Row="0" Grid.Column="0" Click="BackButton_Click" Visibility="Collapsed" 
+                        Margin="20"  Style="{StaticResource NavigationBackButtonNormalStyle}" />
                 <TextBlock Name="TopicTitle" Text="{Binding Name}" Grid.Row="0" Grid.Column="1" FontSize="24" Margin="10" Visibility="Collapsed"/>
+                <ProgressRing Grid.Column="1" Grid.Row="1" Width="60" Height="60" HorizontalAlignment="Center" 
+                              IsActive="{Binding Initialized, Converter={StaticResource BooleanInverter}}" 
+                              Visibility="{Binding Initialized, Converter={StaticResource InverseVisiblityConverter}}" />
                 <ListView Grid.Column="1" Grid.Row="1" Name="Posts" ItemsSource="{Binding Posts}" DoubleTapped="Posts_DoubleTapped"
                           Visibility="{Binding Initialized, Converter={StaticResource VisiblityConverter}}" Margin="1,1,-1,-1">
                     <ListView.ItemsPanel>
