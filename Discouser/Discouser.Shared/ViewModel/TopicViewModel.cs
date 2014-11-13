@@ -37,7 +37,7 @@ namespace Discouser.ViewModel
 
             _changedProperties = new string[] { "Name", "CategoryId", "Activity", "Posts" };
 
-            Changes = true;
+            CanRefresh = true;
         }
 
         public int Id { get { return _model.Id; } }

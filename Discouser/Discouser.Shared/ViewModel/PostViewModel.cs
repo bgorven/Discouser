@@ -72,7 +72,7 @@ namespace Discouser.ViewModel
                 }
             });
 
-            Changes = changedProperties.Any();
+            CanRefresh = changedProperties.Any();
             _changedProperties = changedProperties.ToArray();
         }
 

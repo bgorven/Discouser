@@ -47,20 +47,25 @@ namespace Discouser
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            BackButton.Visibility = Visibility.Collapsed;
-            TopicTitle.Visibility = Visibility.Collapsed;
             Categories.Visibility = Visibility.Visible;
             CategoryGrid.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Auto);
             CategoryGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
+            CategoryGrid.RowDefinitions[2].Height = new GridLength(0, GridUnitType.Star);
         }
 
-        private void Posts_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private void Topic_Selected(object sender, RoutedEventArgs e)
         {
-            BackButton.Visibility = Visibility.Visible;
-            TopicTitle.Visibility = Visibility.Visible;
             Categories.Visibility = Visibility.Collapsed;
             CategoryGrid.RowDefinitions[0].Height = new GridLength(0, GridUnitType.Pixel);
             CategoryGrid.RowDefinitions[1].Height = new GridLength(0, GridUnitType.Star);
+            CategoryGrid.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Star);
+        }
+
+        private async void Refresh_ViewModel(object sender, TappedRoutedEventArgs e)
+        {
+            var viewmodel = ((FrameworkElement)sender).DataContext as IViewModel;
+            if (viewmodel == null) return;
+            if (viewmodel.CanRefresh) await viewmodel.Refresh();
         }
     }
 }

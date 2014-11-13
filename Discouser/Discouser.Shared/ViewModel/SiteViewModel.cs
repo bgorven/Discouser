@@ -28,7 +28,7 @@ namespace Discouser.ViewModel
             {
                 _categories = new ObservableCollection<Category>((await _context.AllCategories()).Select(category => new Category(category, _context)));
                 _changedProperties = new string[] { "Categories" };
-                Changes = true;
+                CanRefresh = true;
             }
         }
 
@@ -39,7 +39,7 @@ namespace Discouser.ViewModel
             {
                 if (_categories == null)
                 {
-                    var task = LoadData();
+                    var task = Refresh();
                 }
                 return _categories;
             }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Discouser.ViewModel
 {
-    abstract class ViewModelBase<TModel> : INotifyPropertyChanged where TModel : class, Model.IModel, new()
+    abstract class ViewModelBase<TModel> : IViewModel where TModel : class, Model.IModel, new()
     {
         protected DataContext _context;
         protected TModel _model;
@@ -18,7 +18,7 @@ namespace Discouser.ViewModel
         {
             _context = context;
             _model = model;
-            LoadDataCommand = new Command(() => this.Changes, LoadData);
+            RefreshCommand = new Command(() => this.CanRefresh, Refresh);
         }
 
         internal async Task<TModel> LoadModel()
@@ -50,10 +50,7 @@ namespace Discouser.ViewModel
         }
 
         private volatile bool _changes = false;
-        /// <summary>
-        /// Used by the UI to indicate that there are changes available.
-        /// </summary>
-        public bool Changes
+        public bool CanRefresh
         {
             get { return _changes; }
             set
@@ -74,15 +71,10 @@ namespace Discouser.ViewModel
             }
         }
 
-        /// <summary>
-        /// <para>Called by the UI when the user is ready to see the changed data.</para>
-        /// <para>Raises property changed events for all properties changed by <code>NotifyChanges</code>, and clears 
-        /// the <code>Changes</code> property.</para>
-        /// </summary>
-        public virtual Task LoadData()
+        public virtual Task Refresh()
         {
             RaisePropertyChanged();
-            Changes = false;
+            CanRefresh = false;
             return _nullTask;
         }
 
@@ -95,7 +87,7 @@ namespace Discouser.ViewModel
         {
             await Initialize();
             await NotifyChanges();
-            if (Changes) await LoadData();
+            if (CanRefresh) await Refresh();
             Initialized = true;
         }
 
@@ -109,7 +101,7 @@ namespace Discouser.ViewModel
             return _nullTask;
         }
 
-        public Command LoadDataCommand { get; private set; }
+        public Command RefreshCommand { get; private set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
